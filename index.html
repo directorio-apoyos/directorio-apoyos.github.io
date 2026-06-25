@@ -83,6 +83,8 @@
   .yt-hint{font-size:.72rem; color:var(--muted); flex-basis:100%; margin-top:2px}
   .empty{color:var(--muted); text-align:center; padding:40px}
   footer{max-width:1000px; margin:0 auto; padding:0 20px 40px; color:var(--muted); font-size:.8rem}
+  .mirrors{margin-top:8px}
+  .mirrors a{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -120,6 +122,7 @@
 <footer>
   Directorio informativo de apoyos públicos. Solo figuras y entidades públicas; solo acciones públicas con fuente.
   Para correcciones o retiros, escribe a <a href="mailto:anonymous@example.com">anonymous@example.com</a>.
+  <div id="mirrors" class="mirrors"></div>
 </footer>
 
 <!-- Librería de Google para el login (necesaria solo para el botón de YouTube) -->
@@ -132,6 +135,10 @@
    enlace al perfil (sin API). Pasos para obtenerlo: ver más abajo.
    ============================================================ */
 const YOUTUBE_CLIENT_ID = "TU_CLIENT_ID.apps.googleusercontent.com";
+
+/* Espejos resistentes a censura. Cuando tengas las URLs (ver DESPLIEGUE.md),
+   pégalas aquí y aparecen como enlaces en el pie del sitio. */
+const MIRRORS = { ipfs: "", arweave: "", onion: "" };
 
 /* ============================================================
    2) AÑADE TUS ENTRADAS AQUÍ.  /  ADD YOUR ENTRIES HERE.
@@ -414,6 +421,17 @@ async function loadEntries(){
   render();
 }
 loadEntries();
+
+/* ---------- enlaces a espejos en el pie (si están configurados) ---------- */
+(function renderMirrors(){
+  const el = document.getElementById("mirrors");
+  if (!el) return;
+  const links = [];
+  if (MIRRORS.ipfs) links.push(`<a href="${esc(MIRRORS.ipfs)}" rel="noopener noreferrer">Espejo IPFS</a>`);
+  if (MIRRORS.arweave) links.push(`<a href="${esc(MIRRORS.arweave)}" rel="noopener noreferrer">Copia permanente (Arweave)</a>`);
+  if (MIRRORS.onion) links.push(`<a href="${esc(MIRRORS.onion)}" rel="noopener noreferrer">Versión Tor (.onion)</a>`);
+  if (links.length) el.innerHTML = "Espejos resistentes a censura: " + links.join(" · ");
+})();
 </script>
 </body>
 </html>
