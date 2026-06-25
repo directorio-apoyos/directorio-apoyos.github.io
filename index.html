@@ -109,7 +109,7 @@
 <body>
 <header>
   <h1>Registro de apoyos a Abelardo de la Espriella</h1>
-  <p class="lead">Medios, empresas, gremios, sindicatos, partidos, líderes y artistas que respaldaron públicamente a <strong>Abelardo de la Espriella</strong>. Mira las pruebas y decide a quién dejar de seguir, comprar o financiar.</p>
+  <p class="lead">Medios, empresas, artistas, partidos, líderes y sindicatos que respaldaron públicamente a <strong>Abelardo de la Espriella</strong>. Mira las pruebas y decide a quién dejar de seguir, comprar o financiar.</p>
   <p class="disclaimer">
     Cada entrada documenta una acción <strong>pública y verificable</strong> (un respaldo, una donación registrada, una aparición) e incluye un enlace a la fuente.
     Las descripciones son fácticas, no opiniones. En YouTube puedes cancelar la suscripción con un clic (conectando tu propia cuenta);
@@ -124,10 +124,10 @@
     <button data-cat="all" class="active">Todos</button>
     <button data-cat="media">Medios</button>
     <button data-cat="company">Empresas</button>
-    <button data-cat="sindicato">Sindicatos</button>
+    <button data-cat="artist">Artistas</button>
     <button data-cat="partido">Partidos</button>
     <button data-cat="lider">Líderes</button>
-    <button data-cat="artist">Artistas</button>
+    <button data-cat="sindicato">Sindicatos</button>
   </div>
 </div>
 
@@ -240,6 +240,10 @@ function render(){
   const groupOf = activeCat === "all" ? (e => CAT_LABEL[e.category] || e.category) : (e => e.subcategory || "Otros");
   const groups = {}, order = [];
   for (const e of items){ const k = groupOf(e); if (!groups[k]){ groups[k] = []; order.push(k); } groups[k].push(e); }
+  if (activeCat === "all"){
+    const LABEL_ORDER = ["media","company","artist","partido","lider","sindicato"].map(c => CAT_LABEL[c]);
+    order.sort((a,b) => (LABEL_ORDER.indexOf(a)<0?99:LABEL_ORDER.indexOf(a)) - (LABEL_ORDER.indexOf(b)<0?99:LABEL_ORDER.indexOf(b)));
+  }
   grid.innerHTML = order.map(k =>
     `<section class="group"><h2 class="group-title">${esc(k)} <span class="group-count">${groups[k].length}</span></h2>`
     + `<div class="grid-inner">${groups[k].map(e => card(e, ENTRIES.indexOf(e))).join("")}</div></section>`
