@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Registro de apoyos a Abelardo de la Espriella</title>
-<meta name="description" content="Medios, empresas y artistas que respaldaron públicamente a Abelardo de la Espriella, con sus fuentes. Decide a quién dejar de seguir, comprar o financiar.">
+<meta name="description" content="Medios, empresas, sindicatos, partidos, líderes y artistas que respaldaron públicamente a Abelardo de la Espriella, con sus fuentes. Decide a quién dejar de seguir, comprar o financiar.">
 <meta property="og:title" content="Registro de apoyos a Abelardo de la Espriella">
-<meta property="og:description" content="Medios, empresas y artistas que respaldaron públicamente a Abelardo de la Espriella, con sus fuentes.">
+<meta property="og:description" content="Medios, empresas, sindicatos, partidos, líderes y artistas que respaldaron públicamente a Abelardo de la Espriella, con sus fuentes.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://apoyaronaabelardo.org/">
 <meta name="twitter:card" content="summary">
@@ -109,7 +109,7 @@
 <body>
 <header>
   <h1>Registro de apoyos a Abelardo de la Espriella</h1>
-  <p class="lead">Medios, empresas y artistas que respaldaron públicamente a <strong>Abelardo de la Espriella</strong>. Mira las pruebas y decide a quién dejar de seguir, comprar o financiar.</p>
+  <p class="lead">Medios, empresas, gremios, sindicatos, partidos, líderes y artistas que respaldaron públicamente a <strong>Abelardo de la Espriella</strong>. Mira las pruebas y decide a quién dejar de seguir, comprar o financiar.</p>
   <p class="disclaimer">
     Cada entrada documenta una acción <strong>pública y verificable</strong> (un respaldo, una donación registrada, una aparición) e incluye un enlace a la fuente.
     Las descripciones son fácticas, no opiniones. En YouTube puedes cancelar la suscripción con un clic (conectando tu propia cuenta);
@@ -124,6 +124,9 @@
     <button data-cat="all" class="active">Todos</button>
     <button data-cat="media">Medios</button>
     <button data-cat="company">Empresas</button>
+    <button data-cat="sindicato">Sindicatos</button>
+    <button data-cat="partido">Partidos</button>
+    <button data-cat="lider">Líderes</button>
     <button data-cat="artist">Artistas</button>
   </div>
 </div>
@@ -207,7 +210,7 @@ let ENTRIES = SAMPLE;  // ← se reemplaza por datos.csv si está disponible
 /* ============================================================
    3) LÓGICA — normalmente no necesitas tocar de aquí en adelante.
    ============================================================ */
-const CAT_LABEL = { media:"Medios", company:"Empresas", artist:"Artistas" };
+const CAT_LABEL = { media:"Medios", company:"Empresas", artist:"Artistas", sindicato:"Sindicatos", partido:"Partidos", lider:"Líderes" };
 const strip = h => String(h).replace(/^@/, "").trim();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -405,7 +408,7 @@ document.getElementById("subfilters").addEventListener("click", ev => {
 document.getElementById("search").addEventListener("input", ev => { query = ev.target.value; render(); });
 
 /* ---------- Datos desde datos.csv (se edita como hoja de cálculo) ---------- */
-const CAT_MAP = { medios:"media", media:"media", empresas:"company", empresa:"company", company:"company", artistas:"artist", artista:"artist", artist:"artist" };
+const CAT_MAP = { medios:"media", media:"media", empresas:"company", empresa:"company", company:"company", artistas:"artist", artista:"artist", artist:"artist", sindicatos:"sindicato", sindicato:"sindicato", partidos:"partido", partido:"partido", lideres:"lider", lider:"lider" };
 const deaccent = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
 function parseCSV(text){
   text = text.replace(/^﻿/, "");
