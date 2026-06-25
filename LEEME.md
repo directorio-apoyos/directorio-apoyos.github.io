@@ -8,6 +8,7 @@ Todo el contenido vive en **`datos.csv`**. Ábrelo como una hoja de cálculo
 |---|---|---|
 | nombre | Nombre del medio / empresa / artista | sí |
 | categoria | `medios`, `empresas` o `artistas` | sí |
+| subcategoria | Tipo dentro de la categoría (Televisión, Radio, Prensa, Bancos, Alimentos, Influencers, Cantantes, Deportistas…). Tú inventas los nombres y el sitio crea los filtros solo. | recomendado |
 | descripcion | Hecho concreto con fecha | recomendado |
 | fuente | Enlace a la prueba pública | **sí — te protege** |
 | instagram, twitter, facebook, tiktok, youtube | el @usuario (sin la URL) | opcional |
