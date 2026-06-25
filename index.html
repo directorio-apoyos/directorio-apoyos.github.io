@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Directorio de apoyos públicos</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#1a1d24; --muted:#8b93a1; --text:#e8eaed;
+    --line:#2a2e38; --accent:#5b8def;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.5;
+  }
+  header{padding:28px 20px 8px; max-width:1000px; margin:0 auto}
+  h1{margin:0 0 6px; font-size:1.6rem}
+  .lead{color:var(--muted); margin:0 0 14px; font-size:.95rem}
+  .disclaimer{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:12px 14px; font-size:.85rem; color:var(--muted); margin:0 0 18px;
+  }
+  .controls{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    max-width:1000px; margin:0 auto 12px; padding:0 20px;
+  }
+  .controls input{
+    flex:1; min-width:200px; padding:10px 12px; border-radius:8px;
+    border:1px solid var(--line); background:var(--card); color:var(--text);
+  }
+  .filters{display:flex; gap:6px; flex-wrap:wrap}
+  .filters button{
+    padding:8px 12px; border-radius:20px; border:1px solid var(--line);
+    background:transparent; color:var(--text); cursor:pointer; font-size:.85rem;
+  }
+  .filters button.active{background:var(--accent); border-color:var(--accent); color:#fff}
+  .yt-bar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    max-width:1000px; margin:0 auto 18px; padding:0 20px;
+  }
+  .yt-bar button{
+    padding:9px 14px; border-radius:8px; border:none; cursor:pointer;
+    font-size:.85rem; font-weight:600; color:#fff; background:#FF0000;
+  }
+  .yt-bar button[hidden]{display:none}
+  #yt-unsub-all{background:#33363f}
+  .yt-status-line{font-size:.82rem; color:var(--muted)}
+  main{max-width:1000px; margin:0 auto; padding:0 20px 60px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:16px}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:16px; display:flex; flex-direction:column; gap:10px;
+  }
+  .card h3{margin:0; font-size:1.1rem}
+  .badge{
+    display:inline-block; font-size:.7rem; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:2px 7px; width:max-content;
+  }
+  .desc{font-size:.9rem; margin:0}
+  .source{font-size:.8rem}
+  .source a{color:var(--accent)}
+  .platforms{display:flex; flex-wrap:wrap; gap:7px; align-items:center; margin-top:auto; padding-top:6px}
+  .platforms a, .platforms button{
+    text-decoration:none; color:#fff; font-size:.78rem; font-weight:600; border:none;
+    padding:7px 10px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; cursor:pointer;
+  }
+  .platforms button:disabled{opacity:.6; cursor:default}
+  .yt-status{font-size:.75rem; color:var(--muted)}
+  .yt-hint{font-size:.72rem; color:var(--muted); flex-basis:100%; margin-top:2px}
+  .empty{color:var(--muted); text-align:center; padding:40px}
+  footer{max-width:1000px; margin:0 auto; padding:0 20px 40px; color:var(--muted); font-size:.8rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>Directorio de apoyos públicos a [NOMBRE DEL CANDIDATO]</h1>
+  <p class="lead">Medios, empresas y artistas que <strong>mostraron apoyo público</strong>, con su fuente. Tú decides si quieres dejar de seguirlos.</p>
+  <p class="disclaimer">
+    Cada entrada documenta una acción <strong>pública y verificable</strong> (un respaldo, una donación registrada, una aparición) e incluye un enlace a la fuente.
+    Las descripciones son fácticas, no opiniones. En YouTube puedes cancelar la suscripción con un clic (conectando tu propia cuenta);
+    en las demás redes el botón abre el perfil para que <strong>tú mismo</strong> decidas dejar de seguir.
+    ¿Ves un error? Escríbenos en el pie de página.
+  </p>
+</header>
+
+<div class="controls">
+  <input id="search" type="search" placeholder="Buscar por nombre…" aria-label="Buscar">
+  <div class="filters" id="filters">
+    <button data-cat="all" class="active">Todos</button>
+    <button data-cat="media">Medios</button>
+    <button data-cat="company">Empresas</button>
+    <button data-cat="artist">Artistas</button>
+  </div>
+</div>
+
+<div class="yt-bar">
+  <button id="yt-connect" hidden>Conectar YouTube</button>
+  <button id="yt-unsub-all" hidden>Cancelar todas las de YouTube (esta vista)</button>
+  <span id="yt-status" class="yt-status-line"></span>
+</div>
+
+<main><div class="grid" id="grid"></div></main>
+
+<footer>
+  Directorio informativo de apoyos públicos. Solo figuras y entidades públicas; solo acciones públicas con fuente.
+  Para correcciones o retiros, escribe a <a href="mailto:correo@ejemplo.com">correo@ejemplo.com</a>.
+</footer>
+
+<!-- Librería de Google para el login (necesaria solo para el botón de YouTube) -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+/* ============================================================
+   1) CONFIGURACIÓN DE YOUTUBE  /  YOUTUBE CONFIG
+   Pega aquí tu OAuth Client ID de Google Cloud (tipo "Web").
+   Si lo dejas como está, los botones de YouTube funcionan como
+   enlace al perfil (sin API). Pasos para obtenerlo: ver más abajo.
+   ============================================================ */
+const YOUTUBE_CLIENT_ID = "TU_CLIENT_ID.apps.googleusercontent.com";
+
+/* ============================================================
+   2) AÑADE TUS ENTRADAS AQUÍ.  /  ADD YOUR ENTRIES HERE.
+   - category: "media" | "company" | "artist"
+   - description: hecho concreto con fecha. (factual, with a date)
+   - source: enlace a la prueba pública (obligatorio).
+   - profiles.youtube: el @handle del canal (p. ej. "@diarioejemplo").
+     Para los demás, solo el @usuario. El botón aparece solo en
+     las redes que rellenes.
+   Los 3 ejemplos son FICTICIOS — reemplázalos.
+   ============================================================ */
+const ENTRIES = [
+  {
+    name: "Diario Ejemplo (FICTICIO)",
+    category: "media",
+    description: "El 2026-05-30 publicó un editorial de respaldo en portada.",
+    source: "https://ejemplo.com/articulo",
+    profiles: { instagram:"diarioejemplo", twitter:"diarioejemplo", facebook:"diarioejemplo", youtube:"@diarioejemplo" }
+  },
+  {
+    name: "Marca Acme (FICTICIO)",
+    category: "company",
+    description: "Donación de campaña registrada el 2026-04-15 (Cuentas Claras).",
+    source: "https://ejemplo.com/cuentas-claras",
+    profiles: { instagram:"marcaacme", twitter:"marcaacme", tiktok:"marcaacme" }
+  },
+  {
+    name: "Artista Demo (FICTICIO)",
+    category: "artist",
+    description: "Se presentó en el cierre de campaña el 2026-05-25.",
+    source: "https://ejemplo.com/concierto",
+    profiles: { instagram:"artistademo", youtube:"@artistademo", tiktok:"artistademo", twitter:"artistademo" }
+  }
+];
+
+/* ============================================================
+   3) LÓGICA — normalmente no necesitas tocar de aquí en adelante.
+   ============================================================ */
+const CAT_LABEL = { media:"Medios", company:"Empresas", artist:"Artistas" };
+const strip = h => String(h).replace(/^@/, "").trim();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const PLATFORMS = [
+  { key:"instagram", label:"Instagram", color:"#E1306C", url:h=>h.startsWith("http")?h:`https://www.instagram.com/${strip(h)}/` },
+  { key:"twitter",   label:"X",         color:"#111111", url:h=>h.startsWith("http")?h:`https://x.com/${strip(h)}` },
+  { key:"facebook",  label:"Facebook",  color:"#1877F2", url:h=>h.startsWith("http")?h:`https://www.facebook.com/${strip(h)}` },
+  { key:"tiktok",    label:"TikTok",    color:"#010101", url:h=>h.startsWith("http")?h:`https://www.tiktok.com/@${strip(h)}` },
+];
+const ytProfileUrl = h => h.startsWith("http") ? h : `https://www.youtube.com/${h.startsWith("@")?h:"@"+strip(h)}`;
+
+let activeCat = "all", query = "";
+const grid = document.getElementById("grid");
+
+function visibleEntries(){
+  return ENTRIES.filter(e =>
+    (activeCat === "all" || e.category === activeCat) &&
+    e.name.toLowerCase().includes(query.toLowerCase())
+  );
+}
+
+function render(){
+  const items = visibleEntries();
+  grid.innerHTML = items.length ? items.map(card).join("") : `<p class="empty">Sin resultados.</p>`;
+}
+
+function ytButton(handle){
+  if (ytToken){
+    return `<button class="yt-unsub" data-handle="${esc(handle)}" style="background:#FF0000">YouTube: cancelar ✕</button>`
+         + `<span class="yt-status" data-for="${esc(handle)}"></span>`;
+  }
+  const link = `<a href="${esc(ytProfileUrl(handle))}" target="_blank" rel="noopener noreferrer" style="background:#FF0000" title="Abrir canal">YouTube ↗</a>`;
+  const hint = ytConfigured ? `<span class="yt-hint">Conecta YouTube arriba ↑ para cancelar con 1 clic</span>` : "";
+  return link + hint;
+}
+
+function card(e){
+  const others = PLATFORMS
+    .filter(p => e.profiles && e.profiles[p.key])
+    .map(p => `<a href="${esc(p.url(e.profiles[p.key]))}" target="_blank" rel="noopener noreferrer" style="background:${p.color}" title="Abrir perfil para dejar de seguir">${p.label} ↗</a>`)
+    .join("");
+  const yt = e.profiles && e.profiles.youtube ? ytButton(e.profiles.youtube) : "";
+  return `
+    <article class="card">
+      <span class="badge">${CAT_LABEL[e.category] || esc(e.category)}</span>
+      <h3>${esc(e.name)}</h3>
+      <p class="desc">${esc(e.description || "")}</p>
+      ${e.source ? `<p class="source"><a href="${esc(e.source)}" target="_blank" rel="noopener noreferrer">Ver fuente ↗</a></p>` : ""}
+      <div class="platforms">${yt}${others}</div>
+    </article>`;
+}
+
+/* ---------- YouTube API (OAuth + cancelar suscripción) ---------- */
+const YT_SCOPE = "https://www.googleapis.com/auth/youtube";
+const ytConfigured = !!YOUTUBE_CLIENT_ID && !YOUTUBE_CLIENT_ID.startsWith("TU_CLIENT_ID");
+let ytToken = null, tokenClient = null;
+
+const connectBtn = document.getElementById("yt-connect");
+const unsubAllBtn = document.getElementById("yt-unsub-all");
+const ytStatusEl = document.getElementById("yt-status");
+const ytStatus = msg => { ytStatusEl.textContent = msg; };
+
+if (ytConfigured) connectBtn.hidden = false;
+else ytStatus("YouTube en modo enlace (sin API). Configura el Client ID para activar el clic único.");
+
+connectBtn.addEventListener("click", () => {
+  if (!(window.google && google.accounts && google.accounts.oauth2)) { ytStatus("Cargando Google… intenta de nuevo en un segundo."); return; }
+  if (!tokenClient){
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: YOUTUBE_CLIENT_ID,
+      scope: YT_SCOPE,
+      callback: (resp) => {
+        if (resp && resp.access_token){
+          ytToken = resp.access_token;
+          connectBtn.hidden = true; unsubAllBtn.hidden = false;
+          ytStatus("YouTube conectado ✓");
+          render();
+        } else { ytStatus("No se pudo conectar."); }
+      },
+    });
+  }
+  tokenClient.requestAccessToken();
+});
+
+async function ytApi(path, opts={}){
+  const r = await fetch(`https://www.googleapis.com/youtube/v3/${path}`, {
+    ...opts, headers:{ Authorization:"Bearer "+ytToken, ...(opts.headers||{}) }
+  });
+  return r;
+}
+
+// @handle -> channelId (UC...), cacheado en el navegador para no gastar cuota.
+async function resolveChannelId(handle){
+  const cacheKey = "ytid:"+strip(handle).toLowerCase();
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) return cached;
+  const h = handle.startsWith("@") ? handle : "@"+strip(handle);
+  const r = await ytApi(`channels?part=id&forHandle=${encodeURIComponent(h)}`);
+  const j = await r.json();
+  const id = j.items && j.items[0] && j.items[0].id;
+  if (id) localStorage.setItem(cacheKey, id);
+  return id || null;
+}
+
+// Devuelve el id del recurso de suscripción si el usuario está suscrito, o null.
+async function findSubscriptionId(channelId){
+  const r = await ytApi(`subscriptions?part=id&mine=true&forChannelId=${channelId}&maxResults=1`);
+  const j = await r.json();
+  return (j.items && j.items[0] && j.items[0].id) || null;
+}
+
+async function unsubscribeOne(handle){
+  const channelId = await resolveChannelId(handle);
+  if (!channelId) return "no-encontrado";
+  const subId = await findSubscriptionId(channelId);
+  if (!subId) return "no-suscrito";
+  const r = await ytApi(`subscriptions?id=${subId}`, { method:"DELETE" });
+  return r.status === 204 ? "cancelada" : "error";
+}
+
+const STATUS_TEXT = { "cancelada":"✓ Cancelada", "no-suscrito":"No estabas suscrito", "no-encontrado":"Canal no encontrado", "error":"Error" };
+
+// Clic en un botón "YouTube: cancelar" de una tarjeta.
+grid.addEventListener("click", async (ev) => {
+  const btn = ev.target.closest(".yt-unsub");
+  if (!btn) return;
+  const handle = btn.dataset.handle;
+  const statusEl = btn.parentElement.querySelector(`.yt-status[data-for="${CSS.escape(handle)}"]`);
+  btn.disabled = true; if (statusEl) statusEl.textContent = "…";
+  try { const res = await unsubscribeOne(handle); if (statusEl) statusEl.textContent = STATUS_TEXT[res] || res; }
+  catch { if (statusEl) statusEl.textContent = "Error"; }
+  finally { btn.disabled = false; }
+});
+
+// Cancelar todas las de la vista actual.
+unsubAllBtn.addEventListener("click", async () => {
+  const list = visibleEntries().filter(e => e.profiles && e.profiles.youtube);
+  if (!list.length) { ytStatus("No hay canales de YouTube en esta vista."); return; }
+  if (!confirm(`¿Cancelar la suscripción a ${list.length} canal(es) de YouTube de esta vista? Se hará en tu propia cuenta.`)) return;
+  unsubAllBtn.disabled = true;
+  let done = 0, skip = 0, err = 0;
+  for (let i = 0; i < list.length; i++){
+    ytStatus(`Procesando ${i+1}/${list.length}…`);
+    try {
+      const res = await unsubscribeOne(list[i].profiles.youtube);
+      if (res === "cancelada") done++; else if (res === "error") err++; else skip++;
+    } catch { err++; }
+  }
+  ytStatus(`Listo: ${done} canceladas, ${skip} omitidas, ${err} errores.`);
+  unsubAllBtn.disabled = false;
+});
+
+/* ---------- filtros y búsqueda ---------- */
+document.getElementById("filters").addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if(!b) return;
+  activeCat = b.dataset.cat;
+  document.querySelectorAll("#filters button").forEach(x => x.classList.toggle("active", x === b));
+  render();
+});
+document.getElementById("search").addEventListener("input", ev => { query = ev.target.value; render(); });
+
+render();
+</script>
+</body>
+</html>
