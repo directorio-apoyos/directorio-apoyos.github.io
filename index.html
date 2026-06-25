@@ -59,6 +59,10 @@
   .yt-bar button[hidden]{display:none}
   #yt-unsub-all{background:#33363f}
   .yt-status-line{font-size:.82rem; color:var(--muted)}
+  .stats-bar{display:flex; flex-wrap:wrap; gap:16px; max-width:1000px; margin:0 auto 16px; padding:10px 20px; color:var(--muted); font-size:.85rem}
+  .stats-bar[hidden]{display:none}
+  .stats-bar .stat{display:inline-flex; align-items:center; gap:6px}
+  .stats-bar b{color:var(--text); font-variant-numeric:tabular-nums; font-size:1rem}
   main{max-width:1000px; margin:0 auto; padding:0 20px 60px}
   .grid{display:flex; flex-direction:column; gap:22px}
   .grid-inner{display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:16px}
@@ -118,6 +122,8 @@
   </p>
   <a class="aportar-btn" href="https://cryptpad.fr/form/#/2/form/view/rFWGdTZV+LUfBFIVCKc0eGc6bC7DEroIvu+ETPqQYlA/" target="_blank" rel="noopener noreferrer">+ Aportar un nombre o empresa</a>
 
+<div class="stats-bar" id="stats-bar" hidden></div>
+
 <div class="controls">
   <input id="search" type="search" placeholder="Buscar por nombre…" aria-label="Buscar">
   <div class="filters" id="filters">
@@ -169,6 +175,9 @@ const YOUTUBE_CLIENT_ID = "TU_CLIENT_ID.apps.googleusercontent.com";
 /* Espejos resistentes a censura. Cuando tengas las URLs (ver DESPLIEGUE.md),
    pégalas aquí y aparecen como enlaces en el pie del sitio. */
 const MIRRORS = { ipfs: "", arweave: "", onion: "" };
+
+/* URL de tu Worker de métricas (ver METRICAS.md). Vacío = barra de estadísticas oculta. */
+const METRICS_URL = "";
 
 /* ============================================================
    2) AÑADE TUS ENTRADAS AQUÍ.  /  ADD YOUR ENTRIES HERE.
@@ -373,7 +382,7 @@ document.addEventListener("click", async (ev) => {
   const handle = btn.dataset.handle;
   const statusEl = btn.parentElement.querySelector(`.yt-status[data-for="${CSS.escape(handle)}"]`);
   btn.disabled = true; if (statusEl) statusEl.textContent = "…";
-  try { const res = await unsubscribeOne(handle); if (statusEl) statusEl.textContent = STATUS_TEXT[res] || res; }
+  try { const res = await unsubscribeOne(handle); if (statusEl) statusEl.textContent = STATUS_TEXT[res] || res; if (res === "cancelada") metricHit("unsub"); }
   catch { if (statusEl) statusEl.textContent = "Error"; }
   finally { btn.disabled = false; }
 });
@@ -389,7 +398,7 @@ unsubAllBtn.addEventListener("click", async () => {
     ytStatus(`Procesando ${i+1}/${list.length}…`);
     try {
       const res = await unsubscribeOne(list[i].profiles.youtube);
-      if (res === "cancelada") done++; else if (res === "error") err++; else skip++;
+      if (res === "cancelada") { done++; metricHit("unsub"); } else if (res === "error") err++; else skip++;
     } catch { err++; }
   }
   ytStatus(`Listo: ${done} canceladas, ${skip} omitidas, ${err} errores.`);
@@ -469,6 +478,35 @@ async function loadEntries(){
   render();
 }
 loadEntries();
+
+/* ---------- métricas agregadas (opcional, vía Worker) ---------- */
+const metricsConfigured = !!METRICS_URL && !METRICS_URL.startsWith("PEGA");
+function metricHit(event){
+  if (!metricsConfigured) return;
+  const url = METRICS_URL.replace(/\/+$/, "") + "/hit?e=" + encodeURIComponent(event);
+  try {
+    if (navigator.sendBeacon) navigator.sendBeacon(url);
+    else fetch(url, { method:"POST", keepalive:true }).catch(()=>{});
+  } catch(e){}
+}
+async function renderStats(){
+  if (!metricsConfigured) return;
+  const bar = document.getElementById("stats-bar");
+  try {
+    const r = await fetch(METRICS_URL.replace(/\/+$/, "") + "/stats", { cache:"no-store" });
+    if (!r.ok) return;
+    const s = await r.json();
+    const fmt = n => Number(n||0).toLocaleString("es-CO");
+    bar.innerHTML =
+      `<span class="stat">👁 <b>${fmt(s.visitas)}</b> visitas</span>`
+      + `<span class="stat">🔗 <b>${fmt(s.enlaces)}</b> perfiles abiertos</span>`
+      + `<span class="stat">✖ <b>${fmt(s.cancelaciones)}</b> cancelaciones en YouTube</span>`;
+    bar.hidden = false;
+  } catch(e){}
+}
+// Cuenta una "apertura de perfil" al hacer clic en cualquier botón de red social.
+document.addEventListener("click", ev => { if (ev.target.closest(".platforms a")) metricHit("click"); });
+if (metricsConfigured){ metricHit("pageview"); renderStats(); }
 
 /* ---------- modal de detalles / pruebas ---------- */
 const modal = document.getElementById("modal");

@@ -1,0 +1,10 @@
+name = "registro-metricas"
+main = "src/worker.js"
+compatibility_date = "2026-01-01"
+
+# Almacén de los contadores (Cloudflare KV).
+# 1) Crea el namespace:   npx wrangler kv namespace create METRICS
+# 2) Pega el id que te devuelva en la línea de abajo (reemplaza PEGA_AQUI_EL_ID).
+[[kv_namespaces]]
+binding = "METRICS"
+id = "PEGA_AQUI_EL_ID"
