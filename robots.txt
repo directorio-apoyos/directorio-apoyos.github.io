@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://directorio-apoyos.github.io/sitemap.xml
+Sitemap: https://apoyaronaabelardo.org/sitemap.xml
