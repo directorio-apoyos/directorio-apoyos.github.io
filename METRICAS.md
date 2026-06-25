@@ -8,44 +8,65 @@ visitantes necesita un mini-backend. Usamos un **Cloudflare Worker** propio
 abiertos, cancelaciones en YouTube). No guarda IPs, ni cookies, ni nada que
 identifique a una persona. Código completo en `metrics-worker/src/worker.js`.
 
-## Desplegarlo (una sola vez, ~5 minutos)
+Hay **dos formas** de desplegarlo. **No necesitas la terminal** si eliges la A.
 
-Necesitas Node instalado y tu cuenta de Cloudflare.
+---
+
+## Opción A — SIN terminal (panel web de Cloudflare) ✅ recomendada
+
+Todo con clics, en https://dash.cloudflare.com (tu cuenta).
+
+1. **Crear el almacén (KV):**
+   - Menú izquierdo → *Almacenamiento y bases de datos* → *KV*
+     (o *Workers y Pages* → *KV*).
+   - *Crear espacio de nombres* → nómbralo **`METRICS`** → *Crear*.
+
+2. **Crear el Worker:**
+   - *Workers y Pages* → *Crear aplicación* → *Crear Worker*.
+   - Nombre: **`registro-metricas`** → *Implementar* (crea uno de ejemplo).
+   - *Editar código* → borra el código de ejemplo → **pega todo** el contenido
+     de `metrics-worker/src/worker.js` → *Implementar*.
+
+3. **Conectar el almacén al Worker:**
+   - En el Worker → *Configuración* → *Variables y enlaces* (Bindings) →
+     *KV namespace bindings* → *Añadir*:
+     - Nombre de variable: **`METRICS`**
+     - Espacio de nombres: elige **`METRICS`**.
+   - Guarda / *Implementar* de nuevo.
+
+4. **Copia la URL** que te da el Worker, del tipo:
+   `https://registro-metricas.TU-SUBDOMINIO.workers.dev`
+
+*(Las etiquetas exactas del panel cambian de vez en cuando; si algo no coincide,
+dime qué ves en pantalla y te guío clic a clic.)*
+
+## Opción B — con terminal (wrangler)
+
+Si te animas con la terminal, son 3 comandos:
 
 ```bash
 cd metrics-worker
-
-# 1) Inicia sesión en TU Cloudflare
 npx wrangler login
-
-# 2) Crea el almacén de contadores y copia el id que imprime
-npx wrangler kv namespace create METRICS
-#   -> pega ese id en wrangler.toml (reemplaza PEGA_AQUI_EL_ID)
-
-# 3) Publica el Worker
+npx wrangler kv namespace create METRICS   # pega el id en wrangler.toml
 npx wrangler deploy
-#   -> te dará una URL del tipo:
-#      https://registro-metricas.TU-SUBDOMINIO.workers.dev
 ```
 
-## Conectarlo al sitio
+---
 
-1. Abre `index.html` y pega esa URL en la línea:
+## Conectar la URL al sitio (lo hago yo si quieres)
+
+1. Pega la URL del Worker en `index.html`:
    ```js
    const METRICS_URL = "https://registro-metricas.TU-SUBDOMINIO.workers.dev";
    ```
-2. En `_headers`, el `connect-src` ya permite `https://*.workers.dev`. Si más
-   adelante le pones un dominio propio al Worker, añádelo ahí.
-3. `git add -A && git commit -m "activar metricas" && git push`
+2. `_headers` ya permite `https://*.workers.dev` en `connect-src`.
+3. `git commit` + `git push`.
 
-Cuando `METRICS_URL` está vacío, la barra de estadísticas simplemente **no
-aparece** (el sitio funciona igual). En cuanto la pegas, aparece sola.
+Mándame la URL y yo hago estos 3 pasos. Mientras `METRICS_URL` esté vacío, la
+barra de estadísticas **no aparece** y el sitio funciona igual.
 
-## Notas
+## ¿Solo quieres saber tú las visitas, sin mostrarlas?
 
-- Los contadores en KV son **aproximados** bajo mucho tráfico simultáneo
-  (puede perderse alguna suma). Para conteo exacto se puede migrar a un
-  *Durable Object*; para "estadísticas de impacto" la aproximación basta.
-- ¿Solo quieres saber tú cuántas visitas hay, sin mostrarlas? Activa
-  **Cloudflare Web Analytics** (gratis, sin cookies) en el panel de Cloudflare:
-  es un panel privado para ti y no necesita este Worker.
+Activa **Cloudflare Web Analytics** (gratis, sin cookies, sin Worker): en el
+panel de Cloudflare → *Analytics* → *Web Analytics* → *Add a site*. Es un panel
+privado para ti, en 2 minutos y sin nada de esto.
