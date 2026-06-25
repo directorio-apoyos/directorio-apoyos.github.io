@@ -84,6 +84,22 @@
   .platforms button:disabled{opacity:.6; cursor:default}
   .yt-status{font-size:.75rem; color:var(--muted)}
   .yt-hint{font-size:.72rem; color:var(--muted); flex-basis:100%; margin-top:2px}
+  .card{cursor:pointer; transition:border-color .15s}
+  .card:hover{border-color:var(--accent)}
+  .card-more{font-size:.78rem; color:var(--accent); margin:0}
+  .modal[hidden]{display:none}
+  .modal{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:18px}
+  .modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.66)}
+  .modal-box{position:relative; background:var(--card); border:1px solid var(--line); border-radius:14px;
+    max-width:620px; width:100%; max-height:88vh; overflow:auto; padding:24px}
+  .modal-close{position:absolute; top:10px; right:12px; background:transparent; border:none; color:var(--muted); font-size:1.25rem; cursor:pointer}
+  .modal-title{margin:8px 0 8px; font-size:1.35rem}
+  .modal-desc{margin:0 0 4px}
+  .modal h4{margin:18px 0 8px; font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted)}
+  .ev-list{margin:0; padding-left:18px; font-size:.9rem; display:flex; flex-direction:column; gap:4px}
+  .ev-list a{color:var(--accent)}
+  .ev-images{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin:6px 0}
+  .ev-images img{width:100%; height:120px; object-fit:cover; border-radius:8px; border:1px solid var(--line); display:block}
   .empty{color:var(--muted); text-align:center; padding:40px}
   footer{max-width:1000px; margin:0 auto; padding:0 20px 40px; color:var(--muted); font-size:.8rem}
   .mirrors{margin-top:8px}
@@ -128,6 +144,14 @@
   <div id="mirrors" class="mirrors"></div>
 </footer>
 
+<div id="modal" class="modal" hidden>
+  <div class="modal-backdrop"></div>
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <button class="modal-close" aria-label="Cerrar">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
 <!-- Librería de Google para el login (necesaria solo para el botón de YouTube) -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
@@ -159,6 +183,8 @@ const SAMPLE = [
     category: "media", subcategory: "Televisión",
     description: "El 2026-05-30 emitió un especial de respaldo.",
     source: "https://ejemplo.com/tv",
+    evidence: [{ t: "Nota de prensa", u: "https://ejemplo.com/nota" }],
+    images: [],
     profiles: { instagram:"canalejemplo", twitter:"canalejemplo", youtube:"@canalejemplo" }
   },
   {
@@ -213,7 +239,7 @@ function render(){
   for (const e of items){ const k = groupOf(e); if (!groups[k]){ groups[k] = []; order.push(k); } groups[k].push(e); }
   grid.innerHTML = order.map(k =>
     `<section class="group"><h2 class="group-title">${esc(k)} <span class="group-count">${groups[k].length}</span></h2>`
-    + `<div class="grid-inner">${groups[k].map(card).join("")}</div></section>`
+    + `<div class="grid-inner">${groups[k].map(e => card(e, ENTRIES.indexOf(e))).join("")}</div></section>`
   ).join("");
 }
 function renderSubChips(){
@@ -240,19 +266,26 @@ function ytButton(handle){
   return link + hint;
 }
 
-function card(e){
+function platformsHTML(e){
   const others = PLATFORMS
     .filter(p => e.profiles && e.profiles[p.key])
     .map(p => `<a href="${esc(p.url(e.profiles[p.key]))}" target="_blank" rel="noopener noreferrer" style="background:${p.color}" title="Abrir perfil para dejar de seguir">${p.label} ↗</a>`)
     .join("");
   const yt = e.profiles && e.profiles.youtube ? ytButton(e.profiles.youtube) : "";
+  return yt + others;
+}
+function evidenceCount(e){
+  return (e.source ? 1 : 0) + (e.evidence ? e.evidence.length : 0) + (e.images ? e.images.length : 0);
+}
+function card(e, i){
+  const n = evidenceCount(e);
   return `
-    <article class="card">
+    <article class="card" data-id="${i}">
       <span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>
       <h3>${esc(e.name)}</h3>
       <p class="desc">${esc(e.description || "")}</p>
-      ${e.source ? `<p class="source"><a href="${esc(e.source)}" target="_blank" rel="noopener noreferrer">Ver fuente ↗</a></p>` : ""}
-      <div class="platforms">${yt}${others}</div>
+      ${n ? `<p class="card-more">Ver pruebas (${n}) →</p>` : ""}
+      <div class="platforms">${platformsHTML(e)}</div>
     </article>`;
 }
 
@@ -327,7 +360,7 @@ async function unsubscribeOne(handle){
 const STATUS_TEXT = { "cancelada":"✓ Cancelada", "no-suscrito":"No estabas suscrito", "no-encontrado":"Canal no encontrado", "error":"Error" };
 
 // Clic en un botón "YouTube: cancelar" de una tarjeta.
-grid.addEventListener("click", async (ev) => {
+document.addEventListener("click", async (ev) => {
   const btn = ev.target.closest(".yt-unsub");
   if (!btn) return;
   const handle = btn.dataset.handle;
@@ -405,12 +438,17 @@ function csvToEntries(text){
     const name = get("nombre"); if (!name) continue;
     const profiles = {};
     ["instagram","twitter","facebook","tiktok","youtube"].forEach(p => { const v = get(p); if (v) profiles[p] = v; });
+    const evidence = (get("evidencia") || "").split("|").map(s => s.trim()).filter(Boolean).map(s => {
+      const k = s.indexOf("::"); return k >= 0 ? { t: s.slice(0, k).trim(), u: s.slice(k + 2).trim() } : { t: "", u: s };
+    });
+    const images = (get("imagenes") || "").split("|").map(s => s.trim()).filter(Boolean);
     out.push({
       name,
       category: CAT_MAP[deaccent(get("categoria").toLowerCase())] || "media",
       subcategory: get("subcategoria"),
       description: get("descripcion"),
       source: get("fuente"),
+      evidence, images,
       profiles
     });
   }
@@ -424,6 +462,39 @@ async function loadEntries(){
   render();
 }
 loadEntries();
+
+/* ---------- modal de detalles / pruebas ---------- */
+const modal = document.getElementById("modal");
+const modalContent = document.getElementById("modal-content");
+function openModal(e){
+  const sub = e.subcategory ? " · " + esc(e.subcategory) : "";
+  const ev = [];
+  if (e.source) ev.push({ t: "Fuente principal", u: e.source });
+  (e.evidence || []).forEach(x => ev.push(x));
+  const evList = ev.length ? `<h4>Pruebas y fuentes</h4><ul class="ev-list">`
+    + ev.map(x => `<li><a href="${esc(x.u)}" target="_blank" rel="noopener noreferrer">${esc(x.t || x.u)} ↗</a></li>`).join("") + `</ul>` : "";
+  const imgs = (e.images && e.images.length) ? `<div class="ev-images">`
+    + e.images.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="" loading="lazy"></a>`).join("") + `</div>` : "";
+  modalContent.innerHTML = `
+    <span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>
+    <h2 class="modal-title">${esc(e.name)}</h2>
+    <p class="modal-desc">${esc(e.description || "")}</p>
+    ${imgs}${evList}
+    <h4>Dejar de seguir / no consumir</h4>
+    <div class="platforms">${platformsHTML(e)}</div>`;
+  modal.hidden = false;
+}
+function closeModal(){ modal.hidden = true; modalContent.innerHTML = ""; }
+modal.querySelector(".modal-backdrop").addEventListener("click", closeModal);
+modal.querySelector(".modal-close").addEventListener("click", closeModal);
+document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !modal.hidden) closeModal(); });
+grid.addEventListener("click", ev => {
+  if (ev.target.closest("a, button")) return;
+  const c = ev.target.closest(".card[data-id]");
+  if (!c) return;
+  const e = ENTRIES[Number(c.dataset.id)];
+  if (e) openModal(e);
+});
 
 /* ---------- enlaces a espejos en el pie (si están configurados) ---------- */
 (function renderMirrors(){

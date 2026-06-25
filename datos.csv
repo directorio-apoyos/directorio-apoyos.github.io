@@ -1,9 +1,9 @@
-nombre,categoria,subcategoria,descripcion,fuente,instagram,twitter,facebook,tiktok,youtube
-Canal Ejemplo TV (FICTICIO),medios,Televisión,"El 2026-05-30 emitió un especial de respaldo.",https://ejemplo.com/tv,canalejemplo,canalejemplo,,,@canalejemplo
-Radio Ejemplo (FICTICIO),medios,Radio,"El 2026-05-28 dedicó su franja matutina a promover la campaña.",https://ejemplo.com/radio,radioejemplo,radioejemplo,,,
-Diario Ejemplo (FICTICIO),medios,Prensa,"El 2026-05-30 publicó un editorial de respaldo en portada.",https://ejemplo.com/articulo,diarioejemplo,diarioejemplo,diarioejemplo,,@diarioejemplo
-Banco Ejemplo (FICTICIO),empresas,Bancos,"Donación de campaña registrada el 2026-04-15 (Cuentas Claras).",https://ejemplo.com/cuentas-claras,bancoejemplo,bancoejemplo,,,
-Alimentos Acme (FICTICIO),empresas,Alimentos,"Aportó al comité de campaña el 2026-04-20 (registro público).",https://ejemplo.com/alimentos,alimentosacme,alimentosacme,,alimentosacme,
-Influencer Demo (FICTICIO),artistas,Influencers,"El 2026-05-22 promovió la campaña en sus redes.",https://ejemplo.com/influencer,influencerdemo,influencerdemo,,influencerdemo,@influencerdemo
-Cantante Demo (FICTICIO),artistas,Cantantes,"Se presentó en el cierre de campaña el 2026-05-25.",https://ejemplo.com/concierto,cantantedemo,,,cantantedemo,@cantantedemo
-Deportista Demo (FICTICIO),artistas,Deportistas,"Apareció en un acto de campaña el 2026-05-18.",https://ejemplo.com/deportista,deportistademo,deportistademo,,,
+nombre,categoria,subcategoria,descripcion,fuente,evidencia,imagenes,instagram,twitter,facebook,tiktok,youtube
+Canal Ejemplo TV (FICTICIO),medios,Televisión,"El 2026-05-30 emitió un especial de respaldo.",https://ejemplo.com/tv,"Nota de prensa::https://ejemplo.com/nota|Video del programa::https://ejemplo.com/video",,canalejemplo,canalejemplo,,,@canalejemplo
+Radio Ejemplo (FICTICIO),medios,Radio,"El 2026-05-28 dedicó su franja matutina a promover la campaña.",https://ejemplo.com/radio,,,radioejemplo,radioejemplo,,,
+Diario Ejemplo (FICTICIO),medios,Prensa,"El 2026-05-30 publicó un editorial de respaldo en portada.",https://ejemplo.com/articulo,"Editorial en portada::https://ejemplo.com/editorial",,diarioejemplo,diarioejemplo,diarioejemplo,,@diarioejemplo
+Banco Ejemplo (FICTICIO),empresas,Bancos,"Donación de campaña registrada el 2026-04-15 (Cuentas Claras).",https://ejemplo.com/cuentas-claras,,,bancoejemplo,bancoejemplo,,,
+Alimentos Acme (FICTICIO),empresas,Alimentos,"Aportó al comité de campaña el 2026-04-20 (registro público).",https://ejemplo.com/alimentos,,,alimentosacme,alimentosacme,,alimentosacme,
+Influencer Demo (FICTICIO),artistas,Influencers,"El 2026-05-22 promovió la campaña en sus redes.",https://ejemplo.com/influencer,,,influencerdemo,influencerdemo,,influencerdemo,@influencerdemo
+Cantante Demo (FICTICIO),artistas,Cantantes,"Se presentó en el cierre de campaña el 2026-05-25.",https://ejemplo.com/concierto,,,cantantedemo,,,cantantedemo,@cantantedemo
+Deportista Demo (FICTICIO),artistas,Deportistas,"Apareció en un acto de campaña el 2026-05-18.",https://ejemplo.com/deportista,,,deportistademo,deportistademo,,,
