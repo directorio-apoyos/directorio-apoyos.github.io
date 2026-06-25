@@ -77,6 +77,8 @@
     display:inline-block; font-size:.7rem; text-transform:uppercase; letter-spacing:.04em;
     color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:2px 7px; width:max-content;
   }
+  .badge-pendiente{color:#ffce4d; border-color:#7a5c00; background:rgba(122,92,0,.2); text-transform:none}
+  .card.pendiente{border-color:#7a5c00}
   .desc{font-size:.9rem; margin:0}
   .source{font-size:.8rem}
   .source a{color:var(--accent)}
@@ -222,6 +224,7 @@ let ENTRIES = SAMPLE;  // ← se reemplaza por datos.csv si está disponible
 const CAT_LABEL = { media:"Medios", company:"Empresas", artist:"Artistas", sindicato:"Sindicatos", partido:"Partidos", lider:"Líderes" };
 const strip = h => String(h).replace(/^@/, "").trim();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const isPend = e => /confirmar|se[ñn]alad/i.test((e && e.estado) || "");
 
 const PLATFORMS = [
   { key:"instagram", label:"Instagram", color:"#E1306C", url:h=>h.startsWith("http")?h:`https://www.instagram.com/${strip(h)}/` },
@@ -296,8 +299,8 @@ function evidenceCount(e){
 function card(e, i){
   const n = evidenceCount(e);
   return `
-    <article class="card" data-id="${i}">
-      <span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>
+    <article class="card${isPend(e) ? " pendiente" : ""}" data-id="${i}">
+      <span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}
       <h3>${esc(e.name)}</h3>
       <p class="desc">${esc(e.description || "")}</p>
       ${n ? `<p class="card-more">Ver pruebas (${n}) →</p>` : ""}
@@ -464,6 +467,7 @@ function csvToEntries(text){
       subcategory: get("subcategoria"),
       description: get("descripcion"),
       source: get("fuente"),
+      estado: get("estado"),
       evidence, images,
       profiles
     });
@@ -521,7 +525,7 @@ function openModal(e){
   const imgs = (e.images && e.images.length) ? `<div class="ev-images">`
     + e.images.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="" loading="lazy"></a>`).join("") + `</div>` : "";
   modalContent.innerHTML = `
-    <span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>
+    <span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}
     <h2 class="modal-title">${esc(e.name)}</h2>
     <p class="modal-desc">${esc(e.description || "")}</p>
     ${imgs}${evList}
