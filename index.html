@@ -79,6 +79,15 @@
   }
   .badge-pendiente{color:#ffce4d; border-color:#7a5c00; background:rgba(122,92,0,.2); text-transform:none}
   .card.pendiente{border-color:#7a5c00}
+  .avatar{width:46px; height:46px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:1.05rem; color:#fff; letter-spacing:.01em; background:var(--c,#64748b);
+    background-image:linear-gradient(135deg, rgba(255,255,255,.24), rgba(0,0,0,.2)); box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+  .card-head{display:flex; gap:12px; align-items:center}
+  .card-head-text{display:flex; flex-direction:column; gap:6px; min-width:0; align-items:flex-start}
+  .card-head-text h3{margin:0}
+  .modal-head{display:flex; gap:14px; align-items:center; margin-bottom:6px}
+  .modal-head .avatar{width:64px; height:64px; font-size:1.5rem}
+  .modal-head .modal-title{margin:6px 0 0}
   .desc{font-size:.9rem; margin:0}
   .source{font-size:.8rem}
   .source a{color:var(--accent)}
@@ -222,6 +231,9 @@ let ENTRIES = SAMPLE;  // ← se reemplaza por datos.csv si está disponible
    3) LÓGICA — normalmente no necesitas tocar de aquí en adelante.
    ============================================================ */
 const CAT_LABEL = { media:"Medios", company:"Empresas", artist:"Artistas", sindicato:"Sindicatos", partido:"Partidos", lider:"Líderes" };
+const CAT_COLOR = { media:"#3b82f6", company:"#0d9488", artist:"#a855f7", partido:"#f59e0b", lider:"#ef4444", sindicato:"#b45309" };
+function initials(name){ const s = String(name).replace(/\([^)]*\)/g,"").replace(/[@#][\w.]+/g,"").trim(); const parts = s.split(/\s+/).filter(Boolean); return (parts.length>=2 ? parts[0][0]+parts[1][0] : s.slice(0,2)).toUpperCase(); }
+function avatarHTML(e){ return `<div class="avatar" style="--c:${CAT_COLOR[e.category]||"#64748b"}">${esc(initials(e.name))}</div>`; }
 const strip = h => String(h).replace(/^@/, "").trim();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const isPend = e => /confirmar|se[ñn]alad/i.test((e && e.estado) || "");
@@ -300,8 +312,7 @@ function card(e, i){
   const n = evidenceCount(e);
   return `
     <article class="card${isPend(e) ? " pendiente" : ""}" data-id="${i}">
-      <span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}
-      <h3>${esc(e.name)}</h3>
+      <div class="card-head">${avatarHTML(e)}<div class="card-head-text"><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>${isPend(e) ? `<span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}<h3>${esc(e.name)}</h3></div></div>
       <p class="desc">${esc(e.description || "")}</p>
       ${n ? `<p class="card-more">Ver pruebas (${n}) →</p>` : ""}
       <div class="platforms">${platformsHTML(e)}</div>
@@ -525,8 +536,7 @@ function openModal(e){
   const imgs = (e.images && e.images.length) ? `<div class="ev-images">`
     + e.images.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="" loading="lazy"></a>`).join("") + `</div>` : "";
   modalContent.innerHTML = `
-    <span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}
-    <h2 class="modal-title">${esc(e.name)}</h2>
+    <div class="modal-head">${avatarHTML(e)}<div><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}<h2 class="modal-title">${esc(e.name)}</h2></div></div>
     <p class="modal-desc">${esc(e.description || "")}</p>
     ${imgs}${evList}
     <h4>Dejar de seguir / no consumir</h4>
