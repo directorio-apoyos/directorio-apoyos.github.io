@@ -134,7 +134,7 @@ const YOUTUBE_CLIENT_ID = "TU_CLIENT_ID.apps.googleusercontent.com";
      las redes que rellenes.
    Los 3 ejemplos son FICTICIOS — reemplázalos.
    ============================================================ */
-const ENTRIES = [
+const SAMPLE = [
   {
     name: "Diario Ejemplo (FICTICIO)",
     category: "media",
@@ -157,6 +157,7 @@ const ENTRIES = [
     profiles: { instagram:"artistademo", youtube:"@artistademo", tiktok:"artistademo", twitter:"artistademo" }
   }
 ];
+let ENTRIES = SAMPLE;  // ← se reemplaza por datos.csv si está disponible
 
 /* ============================================================
    3) LÓGICA — normalmente no necesitas tocar de aquí en adelante.
@@ -323,7 +324,58 @@ document.getElementById("filters").addEventListener("click", ev => {
 });
 document.getElementById("search").addEventListener("input", ev => { query = ev.target.value; render(); });
 
-render();
+/* ---------- Datos desde datos.csv (se edita como hoja de cálculo) ---------- */
+const CAT_MAP = { medios:"media", media:"media", empresas:"company", empresa:"company", company:"company", artistas:"artist", artista:"artist", artist:"artist" };
+const deaccent = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+function parseCSV(text){
+  text = text.replace(/^﻿/, "");
+  const rows = []; let row = [], field = "", q = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (q){
+      if (c === '"' && text[i+1] === '"'){ field += '"'; i++; }
+      else if (c === '"'){ q = false; }
+      else field += c;
+    } else {
+      if (c === '"') q = true;
+      else if (c === ","){ row.push(field); field = ""; }
+      else if (c === "\n"){ row.push(field); rows.push(row); row = []; field = ""; }
+      else if (c !== "\r") field += c;
+    }
+  }
+  if (field !== "" || row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+function csvToEntries(text){
+  const rows = parseCSV(text).filter(r => r.some(c => (c || "").trim() !== ""));
+  if (rows.length < 2) return [];
+  const header = rows[0].map(h => deaccent(h.trim().toLowerCase()));
+  const col = n => header.indexOf(n);
+  const out = [];
+  for (let i = 1; i < rows.length; i++){
+    const r = rows[i];
+    const get = n => { const j = col(n); return j >= 0 && r[j] != null ? r[j].trim() : ""; };
+    const name = get("nombre"); if (!name) continue;
+    const profiles = {};
+    ["instagram","twitter","facebook","tiktok","youtube"].forEach(p => { const v = get(p); if (v) profiles[p] = v; });
+    out.push({
+      name,
+      category: CAT_MAP[deaccent(get("categoria").toLowerCase())] || "media",
+      description: get("descripcion"),
+      source: get("fuente"),
+      profiles
+    });
+  }
+  return out;
+}
+async function loadEntries(){
+  try {
+    const r = await fetch("datos.csv", { cache: "no-store" });
+    if (r.ok){ const parsed = csvToEntries(await r.text()); if (parsed.length) ENTRIES = parsed; }
+  } catch(e){ /* sin CSV (p. ej. abierto como archivo local): se usan los de ejemplo */ }
+  render();
+}
+loadEntries();
 </script>
 </body>
 </html>
