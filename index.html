@@ -247,7 +247,32 @@ const LOGOS = {
   "Cambio Radical": "img/cambio-radical.svg",
   "Salvación Nacional": "img/salvacion-nacional.png"
 };
-const FOTOS = {};
+const FOTOS = {
+  "Marbelle": "img/fotos/marbelle.jpg",
+  "Silvestre Dangond": "img/fotos/silvestre-dangond.jpg",
+  "Cristina Hurtado": "img/fotos/cristina-hurtado.jpg",
+  "Jessica Cediel": "img/fotos/jessica-cediel.jpg",
+  "Amparo Grisales": "img/fotos/amparo-grisales.jpg",
+  "Nairo Quintana": "img/fotos/nairo-quintana.jpg",
+  "Teófilo Gutiérrez": "img/fotos/teofilo-gutierrez.jpg",
+  "Miguel Ángel Borja": "img/fotos/miguel-angel-borja.jpg",
+  "Alejandro Falla": "img/fotos/alejandro-falla.jpg",
+  "Donald Trump": "img/fotos/donald-trump.jpg",
+  "Javier Milei": "img/fotos/javier-milei.jpg",
+  "Alberto Núñez Feijóo": "img/fotos/alberto-nunez-feijoo.jpg",
+  "Santiago Abascal": "img/fotos/santiago-abascal.jpg",
+  "Laura Tobón": "img/fotos/laura-tobon.jpg",
+  "Sara Uribe": "img/fotos/sara-uribe.jpg",
+  "Federico Gutiérrez (Fico)": "img/fotos/federico-gutierrez-fico.jpg",
+  "Álvaro Uribe": "img/fotos/alvaro-uribe.jpg",
+  "Paloma Valencia": "img/fotos/paloma-valencia.jpg",
+  "Iván Duque": "img/fotos/ivan-duque.jpg",
+  "Vicky Dávila": "img/fotos/vicky-davila.jpg",
+  "Bernie Moreno": "img/fotos/bernie-moreno.jpg",
+  "María Elvira Salazar": "img/fotos/maria-elvira-salazar.jpg",
+  "Rick Scott": "img/fotos/rick-scott.jpg",
+  "Manuel Turizo": "img/fotos/manuel-turizo.jpg"
+};
 function initials(name){ const s = String(name).replace(/\([^)]*\)/g,"").replace(/[@#][\w.]+/g,"").trim(); const parts = s.split(/\s+/).filter(Boolean); return (parts.length>=2 ? parts[0][0]+parts[1][0] : s.slice(0,2)).toUpperCase(); }
 function avatarHTML(e){ if (LOGOS[e.name]) return `<div class="avatar avatar-logo"><img src="${LOGOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; if (FOTOS[e.name]) return `<div class="avatar avatar-foto"><img src="${FOTOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; return `<div class="avatar" style="--c:${CAT_COLOR[e.category]||"#64748b"}">${esc(initials(e.name))}</div>`; }
 const strip = h => String(h).replace(/^@/, "").trim();
