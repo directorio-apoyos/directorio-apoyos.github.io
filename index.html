@@ -30,7 +30,10 @@
   .faces-row.r2{animation:facesMarquee 110s linear infinite reverse}
   .faces-band:hover .faces-row{animation-play-state:paused}
   .face-tile{width:54px; height:54px; border-radius:11px; object-fit:cover; flex:0 0 auto;
-    border:1px solid rgba(255,255,255,.08); background:var(--card)}
+    border:1px solid rgba(255,255,255,.08); background:var(--card); cursor:pointer;
+    transition:transform .16s ease, filter .16s ease, box-shadow .16s ease}
+  .face-tile:hover{transform:scale(1.1); filter:brightness(1.12); position:relative; z-index:2;
+    box-shadow:0 4px 14px rgba(0,0,0,.45)}
   @keyframes facesMarquee{from{transform:translateX(0)} to{transform:translateX(-50%)}}
   @media (max-width:560px){ .face-tile{width:46px; height:46px; border-radius:9px} .faces-band{gap:6px} }
   @media (prefers-reduced-motion:reduce){ .faces-row{animation:none} .faces-band{overflow-x:auto} }
@@ -662,21 +665,28 @@ grid.addEventListener("click", ev => {
 (function buildFacesBand(){
   const band = document.getElementById("faces-band");
   if (!band) return;
-  const paths = Object.values(FOTOS);
-  if (paths.length < 6) { band.remove(); return; }
+  const entries = Object.entries(FOTOS);   // [nombre, ruta]
+  if (entries.length < 6) { band.remove(); return; }
   const makeRow = (cls, list) => {
     const row = document.createElement("div");
     row.className = "faces-row " + cls;
-    list.concat(list).forEach(p => {
+    list.concat(list).forEach(([name, p]) => {
       const img = document.createElement("img");
       img.className = "face-tile"; img.src = p; img.alt = ""; img.loading = "lazy";
+      img.title = name; img.dataset.name = name;
       row.appendChild(img);
     });
     return row;
   };
-  const mid = Math.ceil(paths.length / 2);
-  band.appendChild(makeRow("r1", paths.slice(0, mid)));
-  band.appendChild(makeRow("r2", paths.slice(mid).concat(paths.slice(0, 3))));
+  const mid = Math.ceil(entries.length / 2);
+  band.appendChild(makeRow("r1", entries.slice(0, mid)));
+  band.appendChild(makeRow("r2", entries.slice(mid).concat(entries.slice(0, 3))));
+  band.addEventListener("click", ev => {
+    const t = ev.target.closest(".face-tile");
+    if (!t) return;
+    const e = ENTRIES.find(x => x && x.name === t.dataset.name);
+    if (e) openModal(e);
+  });
 })();
 </script>
 </body>
