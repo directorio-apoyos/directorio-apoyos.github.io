@@ -677,10 +677,23 @@ if (metricsConfigured){ metricHit("pageview"); renderStats(); }
 /* ---------- modal de detalles / pruebas ---------- */
 const modal = document.getElementById("modal");
 const modalContent = document.getElementById("modal-content");
+// Etiqueta la fuente principal según su tipo (prensa vs red social), a partir del dominio.
+function sourceLabel(url){
+  let host = "";
+  try { host = new URL(url).hostname.toLowerCase(); } catch(e){ return "Fuente"; }
+  const is = d => host === d || host.endsWith("." + d);
+  if (is("x.com") || is("twitter.com")) return "Publicación en X";
+  if (is("instagram.com")) return "Publicación en Instagram";
+  if (is("tiktok.com")) return "Video en TikTok";
+  if (is("youtube.com") || is("youtu.be")) return "Video en YouTube";
+  if (is("facebook.com") || is("fb.com") || is("fb.watch")) return "Publicación en Facebook";
+  if (is("wikipedia.org")) return "Wikipedia";
+  return "Artículo de prensa";
+}
 function openModal(e){
   const sub = e.subcategory ? " · " + esc(e.subcategory) : "";
   const ev = [];
-  if (e.source) ev.push({ t: "Fuente principal", u: e.source });
+  if (e.source) ev.push({ t: sourceLabel(e.source), u: e.source });
   (e.evidence || []).forEach(x => ev.push(x));
   const evList = ev.length ? `<h4>Pruebas y fuentes</h4><ul class="ev-list">`
     + ev.map(x => `<li><a href="${esc(x.u)}" target="_blank" rel="noopener noreferrer">${esc(x.t || x.u)} ↗</a></li>`).join("") + `</ul>` : "";
