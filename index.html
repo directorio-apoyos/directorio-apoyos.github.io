@@ -34,6 +34,7 @@
     transition:transform .16s ease, filter .16s ease, box-shadow .16s ease}
   .face-tile:hover{transform:scale(1.1); filter:brightness(1.12); position:relative; z-index:2;
     box-shadow:0 4px 14px rgba(0,0,0,.45)}
+  .face-tile.is-logo{object-fit:contain; background:#fff; padding:5px}
   @keyframes facesMarquee{from{transform:translateX(0)} to{transform:translateX(-50%)}}
   @media (max-width:560px){ .face-tile{width:46px; height:46px; border-radius:9px} .faces-band{gap:6px} }
   @media (prefers-reduced-motion:reduce){ .faces-row{animation:none} .faces-band{overflow-x:auto} }
@@ -665,22 +666,29 @@ grid.addEventListener("click", ev => {
 (function buildFacesBand(){
   const band = document.getElementById("faces-band");
   if (!band) return;
-  const entries = Object.entries(FOTOS);   // [nombre, ruta]
-  if (entries.length < 6) { band.remove(); return; }
+  const faces = Object.entries(FOTOS).map(([n,p]) => [n,p,false]);
+  const logos = (typeof LOGOS !== "undefined" ? Object.entries(LOGOS) : []).map(([n,p]) => [n,p,true]);
+  if (faces.length + logos.length < 6) { band.remove(); return; }
+  // intercalar los logos repartidos entre las caras
+  const all = []; let li = 0;
+  const gap = Math.max(1, Math.floor(faces.length / (logos.length || 1)));
+  faces.forEach((f, i) => { all.push(f); if (li < logos.length && (i + 1) % gap === 0) all.push(logos[li++]); });
+  while (li < logos.length) all.push(logos[li++]);
   const makeRow = (cls, list) => {
     const row = document.createElement("div");
     row.className = "faces-row " + cls;
-    list.concat(list).forEach(([name, p]) => {
+    list.concat(list).forEach(([name, p, isLogo]) => {
       const img = document.createElement("img");
-      img.className = "face-tile"; img.src = p; img.alt = ""; img.loading = "lazy";
+      img.className = "face-tile" + (isLogo ? " is-logo" : "");
+      img.src = p; img.alt = ""; img.loading = "lazy";
       img.title = name; img.dataset.name = name;
       row.appendChild(img);
     });
     return row;
   };
-  const mid = Math.ceil(entries.length / 2);
-  band.appendChild(makeRow("r1", entries.slice(0, mid)));
-  band.appendChild(makeRow("r2", entries.slice(mid).concat(entries.slice(0, 3))));
+  const mid = Math.ceil(all.length / 2);
+  band.appendChild(makeRow("r1", all.slice(0, mid)));
+  band.appendChild(makeRow("r2", all.slice(mid).concat(all.slice(0, 3))));
   band.addEventListener("click", ev => {
     const t = ev.target.closest(".face-tile");
     if (!t) return;
