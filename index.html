@@ -123,9 +123,23 @@
   .platforms button:disabled{opacity:.6; cursor:default}
   .yt-status{font-size:.75rem; color:var(--muted)}
   .yt-hint{font-size:.72rem; color:var(--muted); flex-basis:100%; margin-top:2px}
-  .card{cursor:pointer; transition:border-color .15s}
+  .card{cursor:pointer; transition:border-color .15s; position:relative}
   .card:hover{border-color:var(--accent)}
   .card-more{font-size:.78rem; color:var(--accent); margin:0}
+  .save-btn{background:transparent; border:none; cursor:pointer; color:var(--muted); padding:4px; line-height:0; border-radius:8px; transition:color .15s, background .15s}
+  .save-btn:hover{color:var(--text); background:rgba(255,255,255,.06)}
+  .save-btn svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linejoin:round}
+  .save-btn.saved{color:#f5b301}
+  .save-btn.saved svg{fill:currentColor; stroke:currentColor}
+  .card > .save-btn{position:absolute; top:8px; right:8px; z-index:3}
+  .card .card-head-text{padding-right:18px}
+  .filter-saved{display:inline-flex; align-items:center; gap:6px; border-color:#f5b301 !important; color:#f5b301 !important}
+  .filter-saved svg{width:14px; height:14px; fill:currentColor}
+  .filter-saved.active{background:#f5b301 !important; border-color:#f5b301 !important; color:#1a1d24 !important}
+  .saved-count{font-variant-numeric:tabular-nums; background:rgba(245,179,1,.18); border-radius:10px; padding:0 7px; font-size:.78rem; font-weight:700}
+  .filter-saved.active .saved-count{background:rgba(0,0,0,.2)}
+  .saved-hint, .saved-empty{font-size:.9rem; color:var(--muted); background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:0 0 6px; line-height:1.5}
+  .saved-empty{text-align:center; padding:26px 16px}
   .modal[hidden]{display:none}
   .modal{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:18px}
   .modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.66)}
@@ -171,6 +185,7 @@
     <button data-cat="partido">Partidos</button>
     <button data-cat="lider">Líderes</button>
     <button data-cat="sindicato">Sindicatos</button>
+    <button data-cat="saved" id="filter-saved" class="filter-saved" title="Los perfiles que guardaste"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg> Mi lista <span class="saved-count" id="saved-count">0</span></button>
   </div>
 </div>
 
@@ -357,26 +372,53 @@ const ytProfileUrl = h => {
 let activeCat = "all", activeSub = "all", query = "";
 const grid = document.getElementById("grid");
 
+/* ---------- Mi lista: guardar perfiles (localStorage, sin cuenta) ---------- */
+let saved = new Set();
+try { saved = new Set(JSON.parse(localStorage.getItem("guardados") || "[]")); } catch (e) {}
+const isSaved = name => saved.has(name);
+function persistSaved(){ try { localStorage.setItem("guardados", JSON.stringify([...saved])); } catch (e) {} }
+function updateSavedCount(){ const el = document.getElementById("saved-count"); if (el) el.textContent = saved.size; }
+const SAVE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>';
+const SAVED_HINT = '<p class="saved-hint">Tu lista para cancelar de una sentada. Abre cada red y deja de seguir o cancela la suscripcion; el boton de guardar tambien quita de la lista.</p>';
+const saveBtn = name => '<button class="save-btn' + (isSaved(name) ? ' saved' : '') + '" data-save="' + esc(name) + '" aria-pressed="' + isSaved(name) + '" title="' + (isSaved(name) ? 'Quitar de mi lista' : 'Guardar en mi lista') + '">' + SAVE_ICON + '</button>';
+document.addEventListener("click", ev => {
+  const sb = ev.target.closest(".save-btn"); if (!sb) return;
+  const name = sb.dataset.save;
+  if (saved.has(name)) saved.delete(name); else saved.add(name);
+  persistSaved(); updateSavedCount();
+  document.querySelectorAll('.save-btn[data-save="' + CSS.escape(name) + '"]').forEach(b => {
+    const s = saved.has(name);
+    b.classList.toggle("saved", s); b.setAttribute("aria-pressed", s);
+    b.title = s ? "Quitar de mi lista" : "Guardar en mi lista";
+  });
+  if (activeCat === "saved") render();
+});
+updateSavedCount();
+
 function visibleEntries(){
-  return ENTRIES.filter(e =>
-    (activeCat === "all" || e.category === activeCat) &&
-    (activeSub === "all" || (e.subcategory || "Otros").toLowerCase() === activeSub.toLowerCase()) &&
-    e.name.toLowerCase().includes(query.toLowerCase())
-  );
+  const q = query.toLowerCase();
+  return ENTRIES.filter(e => {
+    if (!e.name.toLowerCase().includes(q)) return false;
+    if (activeCat === "saved") return saved.has(e.name);
+    if (activeCat !== "all" && e.category !== activeCat) return false;
+    if (activeSub !== "all" && (e.subcategory || "Otros").toLowerCase() !== activeSub.toLowerCase()) return false;
+    return true;
+  });
 }
 
 function render(){
   renderSubChips();
   const items = visibleEntries();
-  if (!items.length){ grid.innerHTML = `<p class="empty">Sin resultados.</p>`; return; }
-  const groupOf = activeCat === "all" ? (e => CAT_LABEL[e.category] || e.category) : (e => e.subcategory || "Otros");
+  if (!items.length){ grid.innerHTML = activeCat === "saved" ? `<p class="saved-empty">Aún no has guardado perfiles.<br>Toca el botón de guardar en cualquier tarjeta para añadirla aquí, y vuelve para cancelarlas todas de una.</p>` : `<p class="empty">Sin resultados.</p>`; return; }
+  const byCat = activeCat === "all" || activeCat === "saved";
+  const groupOf = byCat ? (e => CAT_LABEL[e.category] || e.category) : (e => e.subcategory || "Otros");
   const groups = {}, order = [];
   for (const e of items){ const k = groupOf(e); if (!groups[k]){ groups[k] = []; order.push(k); } groups[k].push(e); }
-  if (activeCat === "all"){
+  if (byCat){
     const LABEL_ORDER = ["artist","company","media","partido","lider","sindicato"].map(c => CAT_LABEL[c]);
     order.sort((a,b) => (LABEL_ORDER.indexOf(a)<0?99:LABEL_ORDER.indexOf(a)) - (LABEL_ORDER.indexOf(b)<0?99:LABEL_ORDER.indexOf(b)));
   }
-  grid.innerHTML = order.map(k =>
+  grid.innerHTML = (activeCat === "saved" ? SAVED_HINT : "") + order.map(k =>
     `<section class="group"><h2 class="group-title">${esc(k)} <span class="group-count">${groups[k].length}</span></h2>`
     + `<div class="grid-inner">${groups[k].map(e => card(e, ENTRIES.indexOf(e))).join("")}</div></section>`
   ).join("");
@@ -420,6 +462,7 @@ function card(e, i){
   const n = evidenceCount(e);
   return `
     <article class="card${isPend(e) ? " pendiente" : ""}" data-id="${i}">
+      ${saveBtn(e.name)}
       <div class="card-head">${avatarHTML(e)}<div class="card-head-text"><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>${isPend(e) ? `<span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}<h3>${esc(e.name)}</h3></div></div>
       <p class="desc">${esc(e.description || "")}</p>
       ${n ? `<p class="card-more">Ver pruebas (${n}) →</p>` : ""}
