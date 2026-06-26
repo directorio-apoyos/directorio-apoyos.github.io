@@ -153,8 +153,8 @@
   <p class="proposito">Este registro tiene como propósito hacer visibles a las personalidades públicas, empresas e instituciones que respaldaron el proyecto de <strong>Abelardo de la Espriella</strong> desde el inicio. Apoyarlo en público fue una decisión libre y deliberada y, como tal, una <strong>responsabilidad individual y colectiva</strong>.</p>
   <p class="disclaimer">
     Cada entrada documenta una acción <strong>pública y verificable</strong> (un respaldo, una donación registrada, una aparición) e incluye un enlace a la fuente.
-    Las descripciones son fácticas, no opiniones. En YouTube puedes cancelar la suscripción con un clic (conectando tu propia cuenta);
-    en las demás redes el botón abre el perfil para que <strong>tú mismo</strong> decidas dejar de seguir.
+    Las descripciones son fácticas, no opiniones. El botón de cada red abre el perfil o canal oficial de la persona,
+    para que <strong>tú mismo</strong> dejes de seguir o canceles la suscripción.
     ¿Ves un error? Escríbenos en el pie de página.
   </p>
   <a class="aportar-btn" href="https://cryptpad.fr/form/#/2/form/view/rFWGdTZV+LUfBFIVCKc0eGc6bC7DEroIvu+ETPqQYlA/" target="_blank" rel="noopener noreferrer">+ Aportar un nombre o empresa</a>
@@ -348,7 +348,11 @@ const PLATFORMS = [
   { key:"facebook",  label:"Facebook",  color:"#1877F2", url:h=>h.startsWith("http")?h:`https://www.facebook.com/${strip(h)}` },
   { key:"tiktok",    label:"TikTok",    color:"#010101", url:h=>h.startsWith("http")?h:`https://www.tiktok.com/@${strip(h)}` },
 ];
-const ytProfileUrl = h => h.startsWith("http") ? h : `https://www.youtube.com/${h.startsWith("@")?h:"@"+strip(h)}`;
+const ytProfileUrl = h => {
+  if (h.startsWith("http")) return h;
+  const v = strip(h).replace(/^@+/, "");
+  return /^UC[\w-]{20,}$/.test(v) ? `https://www.youtube.com/channel/${v}` : `https://www.youtube.com/@${v}`;
+};
 
 let activeCat = "all", activeSub = "all", query = "";
 const grid = document.getElementById("grid");
@@ -434,7 +438,7 @@ const ytStatusEl = document.getElementById("yt-status");
 const ytStatus = msg => { ytStatusEl.textContent = msg; };
 
 if (ytConfigured) connectBtn.hidden = false;
-else ytStatus("YouTube en modo enlace (sin API). Configura el Client ID para activar el clic único.");
+else { const bar = document.querySelector(".yt-bar"); if (bar) bar.style.display = "none"; }
 
 connectBtn.addEventListener("click", () => {
   if (!(window.google && google.accounts && google.accounts.oauth2)) { ytStatus("Cargando Google… intenta de nuevo en un segundo."); return; }
