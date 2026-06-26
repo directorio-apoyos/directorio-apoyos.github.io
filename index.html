@@ -665,12 +665,12 @@ async function renderStats(){
     const fmt = n => Number(n||0).toLocaleString("es-CO");
     bar.innerHTML =
       `<span class="stat">👁 <b>${fmt(s.visitas)}</b> visitas</span>`
-      + `<span class="stat">🔗 <b>${fmt(s.enlaces)}</b> perfiles abiertos</span>`
-      + `<span class="stat">✖ <b>${fmt(s.cancelaciones)}</b> cancelaciones en YouTube</span>`;
+      + `<span class="stat">👤 <b>${fmt(s.cancelaciones)}</b> perfiles abiertos</span>`
+      + `<span class="stat">🔗 <b>${fmt(s.enlaces)}</b> clics a redes</span>`;
     bar.hidden = false;
   } catch(e){}
 }
-// Cuenta una "apertura de perfil" al hacer clic en cualquier botón de red social.
+// Cuenta un clic a una red social (el visitante abre el perfil para dejar de seguir).
 document.addEventListener("click", ev => { if (ev.target.closest(".platforms a")) metricHit("click"); });
 if (metricsConfigured){ metricHit("pageview"); renderStats(); }
 
@@ -693,6 +693,8 @@ function openModal(e){
     <h4>Dejar de seguir / no consumir</h4>
     <div class="platforms">${platformsHTML(e)}</div>`;
   modal.hidden = false;
+  // Apertura de ficha: reutilizamos el evento "unsub" (ya sin uso, sin API de YouTube) como contador, para no redesplegar el Worker.
+  metricHit("unsub");
 }
 function closeModal(){ modal.hidden = true; modalContent.innerHTML = ""; }
 modal.querySelector(".modal-backdrop").addEventListener("click", closeModal);
