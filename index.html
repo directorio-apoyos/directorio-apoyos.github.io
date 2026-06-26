@@ -255,6 +255,7 @@ const FOTOS = {
   "Jessica Cediel": "img/fotos/jessica-cediel.jpg",
   "Amparo Grisales": "img/fotos/amparo-grisales.jpg",
   "Sebastián Caicedo": "img/fotos/sebastian-caicedo.png",
+  "Piter Albeiro": "img/fotos/piter-albeiro.png",
   "Nairo Quintana": "img/fotos/nairo-quintana.jpg",
   "Teófilo Gutiérrez": "img/fotos/teofilo-gutierrez.jpg",
   "Miguel Ángel Borja": "img/fotos/miguel-angel-borja.jpg",
@@ -270,6 +271,8 @@ const FOTOS = {
   "Sara Uribe": "img/fotos/sara-uribe.jpg",
   "Caterine Ibargüen": "img/fotos/caterine-ibarguen.jpg",
   "Ana del Castillo": "img/fotos/ana-del-castillo.webp",
+  "La Barbie Colombiana": "img/fotos/la-barbie-colombiana.png",
+  "Aithana": "img/fotos/aithana.png",
   "Katherine Porto": "img/fotos/katherine-porto.png",
   "Pipe Bueno": "img/fotos/pipe-bueno.jpg",
   "Alzate": "img/fotos/alzate.png",
@@ -295,7 +298,8 @@ const FOTOS = {
   "Carlos Valderrama": "img/fotos/carlos-valderrama.jpg",
   "Víctor Danilo Pacheco": "img/fotos/victor-danilo-pacheco.png",
   "Manuel Turizo": "img/fotos/manuel-turizo.jpg",
-  "Orlando Liñán": "img/fotos/orlando-linan.png"
+  "Orlando Liñán": "img/fotos/orlando-linan.png",
+  "La Granja del Borrego": "img/fotos/la-granja-del-borrego.png"
 };
 function initials(name){ const s = String(name).replace(/\([^)]*\)/g,"").replace(/[@#][\w.]+/g,"").trim(); const parts = s.split(/\s+/).filter(Boolean); return (parts.length>=2 ? parts[0][0]+parts[1][0] : s.slice(0,2)).toUpperCase(); }
 function avatarHTML(e){ if (LOGOS[e.name]) return `<div class="avatar avatar-logo"><img src="${LOGOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; if (FOTOS[e.name]) return `<div class="avatar avatar-foto"><img src="${FOTOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; return `<div class="avatar" style="--c:${CAT_COLOR[e.category]||"#64748b"}">${esc(initials(e.name))}</div>`; }
