@@ -332,7 +332,8 @@ const FOTOS = {
   "Andrea Valdiri": "img/fotos/andrea-valdiri.png",
   "La Granja del Borrego": "img/fotos/la-granja-del-borrego.png",
   "MAÍA": "img/fotos/maia.png",
-  "Paulina Vega": "img/fotos/paulina-vega.png"
+  "Paulina Vega": "img/fotos/paulina-vega.png",
+  "Jhonny Romero": "img/fotos/jhonny-romero.png"
 };
 function initials(name){ const s = String(name).replace(/\([^)]*\)/g,"").replace(/[@#][\w.]+/g,"").trim(); const parts = s.split(/\s+/).filter(Boolean); return (parts.length>=2 ? parts[0][0]+parts[1][0] : s.slice(0,2)).toUpperCase(); }
 function avatarHTML(e){ if (LOGOS[e.name]) return `<div class="avatar avatar-logo"><img src="${LOGOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; if (FOTOS[e.name]) return `<div class="avatar avatar-foto"><img src="${FOTOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; return `<div class="avatar" style="--c:${CAT_COLOR[e.category]||"#64748b"}">${esc(initials(e.name))}</div>`; }
