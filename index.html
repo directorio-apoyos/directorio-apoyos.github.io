@@ -165,9 +165,9 @@
   <input id="search" type="search" placeholder="Buscar por nombre…" aria-label="Buscar">
   <div class="filters" id="filters">
     <button data-cat="all" class="active">Todos</button>
-    <button data-cat="media">Medios</button>
-    <button data-cat="company">Empresas</button>
     <button data-cat="artist">Artistas</button>
+    <button data-cat="company">Empresas</button>
+    <button data-cat="media">Medios</button>
     <button data-cat="partido">Partidos</button>
     <button data-cat="lider">Líderes</button>
     <button data-cat="sindicato">Sindicatos</button>
@@ -265,7 +265,9 @@ const LOGOS = {
   "VOX": "img/vox.png",
   "Junior FC": "img/junior.png",
   "Cambio Radical": "img/cambio-radical.svg",
-  "Salvación Nacional": "img/salvacion-nacional.png"
+  "Salvación Nacional": "img/salvacion-nacional.png",
+  "Olímpica": "img/olimpica.svg",
+  "Creemos": "img/creemos.png"
 };
 const FOTOS = {
   "Marbelle": "img/fotos/marbelle.jpg",
@@ -361,7 +363,7 @@ function render(){
   const groups = {}, order = [];
   for (const e of items){ const k = groupOf(e); if (!groups[k]){ groups[k] = []; order.push(k); } groups[k].push(e); }
   if (activeCat === "all"){
-    const LABEL_ORDER = ["media","company","artist","partido","lider","sindicato"].map(c => CAT_LABEL[c]);
+    const LABEL_ORDER = ["artist","company","media","partido","lider","sindicato"].map(c => CAT_LABEL[c]);
     order.sort((a,b) => (LABEL_ORDER.indexOf(a)<0?99:LABEL_ORDER.indexOf(a)) - (LABEL_ORDER.indexOf(b)<0?99:LABEL_ORDER.indexOf(b)));
   }
   grid.innerHTML = order.map(k =>
