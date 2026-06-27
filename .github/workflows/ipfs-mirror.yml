@@ -1,14 +1,19 @@
 # Espejo IPFS — copia descentralizada y resistente a censura del sitio.
-# En cada push sube el sitio a IPFS (vía Pinata) y actualiza solo el enlace
-# "Espejo IPFS" del pie de página.
+# En cada push sube el sitio a IPFS (vía Pinata) y registra la dirección del
+# espejo de forma PRIVADA, en el resumen del propio run (pestaña Actions).
+# NO publica ningún enlace en el sitio: el espejo es un plan de respaldo
+# ("break-glass") que tú anuncias por tus propios canales SOLO si el sitio
+# principal deja de funcionar.
 #
 # REQUISITO (una sola vez): un secreto del repo llamado PINATA_JWT
 #   1) Crea cuenta en https://pinata.cloud  (correo neutral, vía VPN).
-#   2) Pinata -> API Keys -> New Key -> marca "pinFileToIPFS" (o Admin) -> copia el JWT.
+#   2) Pinata -> API Keys -> New Key -> Admin -> copia el JWT.
 #   3) GitHub repo -> Settings -> Secrets and variables -> Actions -> New repository secret
-#        Name:  PINATA_JWT      Value: (el JWT que copiaste)
-#   4) Pestaña Actions -> "Espejo IPFS" -> Run workflow  (o haz cualquier push).
+#        Name:  PINATA_JWT      Value: (el JWT)
 # Sin el secreto, este workflow se salta solo (no falla).
+#
+# ¿Necesitas la dirección del espejo? Pestaña Actions -> último run "Espejo IPFS"
+# -> el resumen muestra la URL lista para copiar.
 
 name: Espejo IPFS
 
@@ -18,14 +23,13 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ipfs-mirror
 
 jobs:
   pin:
-    if: ${{ !contains(github.event.head_commit.message, '[ipfs]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +44,8 @@ jobs:
             echo "skip=1" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          # Construye la subida multipart con TODOS los archivos del sitio (rutas relativas).
+          # Subida multipart con TODOS los archivos del sitio, agrupados bajo UN
+          # directorio raiz (si no, Pinata rechaza el pin con 'More than one file').
           args=()
           while IFS= read -r -d '' f; do
             args+=(-F "file=@${f};filename=site/${f#./}")
@@ -62,24 +67,20 @@ jobs:
           echo "cid=$cid" >> "$GITHUB_OUTPUT"
           echo "::notice::Sitio fijado en IPFS. CID: $cid"
 
-      - name: Actualizar el enlace del espejo en el pie
+      - name: Registrar la direccion del espejo (PRIVADO, no se publica)
         if: ${{ steps.pin.outputs.skip != '1' && steps.pin.outputs.cid != '' }}
         run: |
           CID="${{ steps.pin.outputs.cid }}"
           URL="https://${CID}.ipfs.dweb.link"
-          node -e '
-            const fs = require("fs");
-            const url = process.argv[1];
-            let h = fs.readFileSync("index.html", "utf8");
-            const out = h.replace(/ipfs:\s*"[^"]*"/, `ipfs: "${url}"`);
-            if (out !== h) { fs.writeFileSync("index.html", out); console.log("MIRRORS.ipfs -> " + url); }
-            else { console.log("sin cambios en MIRRORS.ipfs"); }
-          ' "$URL"
-          if git diff --quiet -- index.html; then
-            echo "Nada que actualizar."
-            exit 0
-          fi
-          git config user.name "anonymous"
-          git config user.email "anonymous@example.com"
-          git commit -am "espejo IPFS: actualizar CID a ${CID} [ipfs]"
-          git push
+          {
+            echo "## Espejo IPFS actualizado"
+            echo ""
+            echo "**Direccion del espejo (privada):**"
+            echo ""
+            echo "    $URL"
+            echo ""
+            echo "CID: \`$CID\`"
+            echo ""
+            echo "> Esta direccion NO aparece en el sitio publico. Compartela por tus propios canales SOLO si el sitio principal deja de funcionar."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Espejo IPFS (privado): $URL"
