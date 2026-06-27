@@ -317,6 +317,19 @@ const LOGOS = {
   "Semana": "img/semana.svg",
   "Ducales": "img/ducales.jpg",
   "Saltín Noel": "img/saltin-noel.jpg",
+  "Zenú": "img/zenu.svg",
+  "Colcafé": "img/colcafe.png",
+  "Doria": "img/doria.png",
+  "Ranchera": "img/ranchera.png",
+  "Yupi": "img/yupi.webp",
+  "Rimax": "img/rimax.png",
+  "GHL Hoteles": "img/ghl-hoteles.jpg",
+  "Jumbo": "img/jumbo.png",
+  "Chocolisto": "img/chocolisto.png",
+  "Montblanc": "img/montblanc.webp",
+  "TOSH": "img/tosh.png",
+  "Festival": "img/festival.png",
+  "Bon Bril": "img/bon-bril.jpg",
   "Bancolombia": "img/bancolombia.png",
   "BBVA": "img/bbva.svg",
   "Banco de Bogotá": "img/banco-de-bogota.png",
@@ -400,7 +413,7 @@ const FOTOS = {
   "Jhonny Romero": "img/fotos/jhonny-romero.png"
 };
 function initials(name){ const s = String(name).replace(/\([^)]*\)/g,"").replace(/[@#][\w.]+/g,"").trim(); const parts = s.split(/\s+/).filter(Boolean); return (parts.length>=2 ? parts[0][0]+parts[1][0] : s.slice(0,2)).toUpperCase(); }
-const FILL_LOGOS = new Set(["Banco de Bogotá","Americana de Colchones","Sello Rojo","Jet"]);
+const FILL_LOGOS = new Set(["Banco de Bogotá","Americana de Colchones","Sello Rojo","Jet","Bon Bril"]);
 function avatarHTML(e){ if (LOGOS[e.name]) return `<div class="avatar avatar-logo${FILL_LOGOS.has(e.name) ? " avatar-fill" : ""}"><img src="${LOGOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; if (FOTOS[e.name]) return `<div class="avatar avatar-foto"><img src="${FOTOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; return `<div class="avatar" style="--c:${CAT_COLOR[e.category]||"#64748b"}">${esc(initials(e.name))}</div>`; }
 const strip = h => String(h).replace(/^@/, "").trim();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
