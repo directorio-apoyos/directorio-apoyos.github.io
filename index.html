@@ -1,15 +1,28 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-CO">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro de apoyos a Abelardo de la Espriella</title>
-<meta name="description" content="Medios, empresas, sindicatos, partidos, líderes y artistas que respaldaron públicamente a Abelardo de la Espriella, con sus fuentes. Decide a quién dejar de seguir, comprar o financiar.">
-<meta property="og:title" content="Registro de apoyos a Abelardo de la Espriella">
-<meta property="og:description" content="Medios, empresas, sindicatos, partidos, líderes y artistas que respaldaron públicamente a Abelardo de la Espriella, con sus fuentes.">
+<title>Quién apoya a Abelardo de la Espriella: empresas, artistas y financiación</title>
+<meta name="description" content="Registro público y con fuentes de empresas, bancos, artistas, partidos, líderes y sindicatos que respaldaron a Abelardo de la Espriella, y de la financiación de su campaña (créditos declarados en Cuentas Claras – CNE).">
+<link rel="canonical" href="https://apoyaronaabelardo.org/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="geo.region" content="CO">
+<meta name="geo.placename" content="Colombia">
+<meta property="og:title" content="Quién apoya a Abelardo de la Espriella: empresas, artistas y financiación">
+<meta property="og:description" content="Empresas, bancos, artistas, partidos y líderes que respaldaron a Abelardo de la Espriella, con fuentes. Incluye la financiación de su campaña (Cuentas Claras – CNE).">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://apoyaronaabelardo.org/">
-<meta name="twitter:card" content="summary">
+<meta property="og:site_name" content="Registro de apoyos a Abelardo de la Espriella">
+<meta property="og:locale" content="es_CO">
+<meta property="og:image" content="https://apoyaronaabelardo.org/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Registro de apoyos a Abelardo de la Espriella, con fuentes">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Quién apoya a Abelardo de la Espriella">
+<meta name="twitter:description" content="Empresas, bancos, artistas y líderes que respaldaron a Abelardo de la Espriella, con fuentes. Financiación de campaña (Cuentas Claras – CNE).">
+<meta name="twitter:image" content="https://apoyaronaabelardo.org/og-image.jpg">
 <meta name="theme-color" content="#ffffff">
 <script>(function(){try{var t=localStorage.getItem("tema");if(t!=="dark"&&t!=="light")t=(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","light");}})();</script>
 <style>
@@ -213,6 +226,9 @@
 </div>
 
 <main><div class="grid" id="grid"></div></main>
+<noscript>
+  <p style="max-width:1000px;margin:14px auto;padding:0 20px;color:var(--muted)">Activa JavaScript para ver el registro completo —con fuentes— de las empresas, bancos, artistas, partidos, líderes y sindicatos que respaldaron a Abelardo de la Espriella, y de la financiación de su campaña (Cuentas Claras – CNE).</p>
+</noscript>
 
 <footer>
   Directorio informativo de apoyos públicos. Solo figuras y entidades públicas; solo acciones públicas con fuente.
@@ -377,6 +393,7 @@ function avatarHTML(e){ if (LOGOS[e.name]) return `<div class="avatar avatar-log
 const strip = h => String(h).replace(/^@/, "").trim();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const isPend = e => /confirmar|se[ñn]alad/i.test((e && e.estado) || "");
+const slugify = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/\([^)]*\)/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 
 const PLATFORMS = [
   { key:"instagram", label:"Instagram", color:"#E1306C", url:h=>h.startsWith("http")?h:`https://www.instagram.com/${strip(h)}/` },
@@ -482,7 +499,7 @@ function evidenceCount(e){
 function card(e, i){
   const n = evidenceCount(e);
   return `
-    <article class="card${isPend(e) ? " pendiente" : ""}" data-id="${i}">
+    <article id="${slugify(e.name)}" class="card${isPend(e) ? " pendiente" : ""}" data-id="${i}">
       ${saveBtn(e.name)}
       <div class="card-head">${avatarHTML(e)}<div class="card-head-text"><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>${isPend(e) ? `<span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}<h3>${esc(e.name)}</h3></div></div>
       <p class="desc">${esc(e.description || "")}</p>
@@ -657,12 +674,57 @@ function csvToEntries(text){
   }
   return out;
 }
+/* ---------- SEO: datos estructurados (JSON-LD) y enlaces directos por ficha ---------- */
+const SITE_URL = "https://apoyaronaabelardo.org/";
+function injectJsonLd(){
+  if (!ENTRIES.length || ENTRIES === SAMPLE) return;
+  const personCats = { artist:1, lider:1 };
+  const items = ENTRIES.map((e, i) => {
+    const it = {
+      "@type": personCats[e.category] ? "Person" : "Organization",
+      "name": e.name,
+      "url": SITE_URL + "#" + slugify(e.name)
+    };
+    if (e.description) it.description = e.description;
+    if (e.source) it.subjectOf = { "@type": "WebPage", "url": e.source };
+    return { "@type": "ListItem", "position": i + 1, "item": it };
+  });
+  const data = [
+    {
+      "@context": "https://schema.org", "@type": "WebSite",
+      "name": "Registro de apoyos a Abelardo de la Espriella",
+      "url": SITE_URL, "inLanguage": "es-CO",
+      "description": "Registro público, con fuentes, de empresas, bancos, artistas, partidos, líderes y sindicatos que respaldaron a Abelardo de la Espriella, y de la financiación de su campaña.",
+      "about": { "@type": "Person", "name": "Abelardo de la Espriella" }
+    },
+    {
+      "@context": "https://schema.org", "@type": "ItemList",
+      "name": "Apoyos públicos a Abelardo de la Espriella",
+      "numberOfItems": ENTRIES.length,
+      "itemListOrder": "https://schema.org/ItemListUnordered",
+      "itemListElement": items
+    }
+  ];
+  let s = document.getElementById("ld-json");
+  if (!s){ s = document.createElement("script"); s.type = "application/ld+json"; s.id = "ld-json"; document.head.appendChild(s); }
+  s.textContent = JSON.stringify(data);
+}
+function openFromHash(){
+  const slug = decodeURIComponent((location.hash || "").replace(/^#/, "")).trim();
+  if (!slug) return;
+  const e = ENTRIES.find(x => x && slugify(x.name) === slug);
+  if (e) openModal(e);
+}
+window.addEventListener("hashchange", openFromHash);
+
 async function loadEntries(){
   try {
     const r = await fetch("datos.csv", { cache: "no-store" });
     if (r.ok){ const parsed = csvToEntries(await r.text()); if (parsed.length) ENTRIES = parsed; }
   } catch(e){ /* sin CSV (p. ej. abierto como archivo local): se usan los de ejemplo */ }
   render();
+  injectJsonLd();
+  openFromHash();
 }
 loadEntries();
 
@@ -726,10 +788,11 @@ function openModal(e){
     ${imgs}${evList}
     ${platformsHTML(e) ? `<h4>Dejar de seguir / no consumir</h4><div class="platforms">${platformsHTML(e)}</div>` : ""}`;
   modal.hidden = false;
+  try { history.replaceState(null, "", "#" + slugify(e.name)); } catch(err){}
   // Apertura de ficha: reutilizamos el evento "unsub" (ya sin uso, sin API de YouTube) como contador, para no redesplegar el Worker.
   metricHit("unsub");
 }
-function closeModal(){ modal.hidden = true; modalContent.innerHTML = ""; }
+function closeModal(){ modal.hidden = true; modalContent.innerHTML = ""; try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch(err){} }
 modal.querySelector(".modal-backdrop").addEventListener("click", closeModal);
 modal.querySelector(".modal-close").addEventListener("click", closeModal);
 document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !modal.hidden) closeModal(); });
