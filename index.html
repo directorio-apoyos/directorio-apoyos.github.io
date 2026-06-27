@@ -752,7 +752,7 @@ grid.addEventListener("click", ev => {
     row.className = "faces-row " + cls;
     list.concat(list).forEach(([name, p, isLogo]) => {
       const img = document.createElement("img");
-      img.className = "face-tile" + (isLogo ? " is-logo" : "");
+      img.className = "face-tile" + (isLogo && !FILL_LOGOS.has(name) ? " is-logo" : "");
       img.src = p; img.alt = ""; img.loading = "lazy";
       img.title = name; img.dataset.name = name;
       row.appendChild(img);
