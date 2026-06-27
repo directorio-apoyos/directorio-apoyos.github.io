@@ -147,7 +147,7 @@
   .modal-head .modal-title{margin:6px 0 0}
   @media (max-width:560px){ .avatar{width:80px; height:80px; font-size:1.7rem} .card-head{gap:14px} .modal-head .avatar{width:92px; height:92px} }
   .desc{font-size:.9rem; margin:0}
-  .desc.clamp{display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden}
+  .desc.clamp{display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden}
   .ver-mas{align-self:flex-start; background:none; border:none; color:var(--accent); font-size:.82rem; font-weight:600; cursor:pointer; padding:0; margin:-3px 0 0}
   .ver-mas:hover{text-decoration:underline}
   .source{font-size:.8rem}
@@ -537,8 +537,8 @@ function card(e, i){
     <article id="${slugify(e.name)}" class="card${isPend(e) ? " pendiente" : ""}" data-id="${i}">
       ${saveBtn(e.name)}
       <div class="card-head">${avatarHTML(e)}<div class="card-head-text"><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>${isPend(e) ? `<span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}${isIndirect(e) ? `<span class="badge badge-indirecto">Vínculo indirecto</span>` : ""}<h3>${esc(e.name)}</h3></div></div>
-      <p class="desc${(e.description || "").length > 170 ? " clamp" : ""}">${esc(e.description || "")}</p>
-      ${(e.description || "").length > 170 ? `<button class="ver-mas" type="button">ver más</button>` : ""}
+      <p class="desc${(e.description || "").length > 300 ? " clamp" : ""}">${esc(e.description || "")}</p>
+      ${(e.description || "").length > 300 ? `<button class="ver-mas" type="button">ver más</button>` : ""}
       ${n ? `<p class="card-more">Ver pruebas (${n}) →</p>` : ""}
       <div class="platforms">${platformsHTML(e)}</div>
     </article>`;
