@@ -112,6 +112,7 @@
   .grid{display:flex; flex-direction:column; gap:22px}
   .grid-inner{display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:16px}
   .group-title{font-size:1rem; font-weight:600; margin:0 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line)}
+  .group-note{margin:-2px 0 12px; font-size:.85rem; color:var(--muted); background:rgba(91,141,239,.08); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:8px; padding:9px 12px}
   .group-count{font-size:.8rem; font-weight:400; color:var(--muted)}
   .card{
     background:var(--card); border:1px solid var(--line); border-radius:12px;
@@ -306,6 +307,12 @@ let ENTRIES = SAMPLE;  // ← se reemplaza por datos.csv si está disponible
 const CAT_LABEL = { media:"Medios", company:"Empresas", artist:"Artistas", sindicato:"Sindicatos", partido:"Partidos", lider:"Líderes" };
 const CAT_COLOR = { media:"#3b82f6", company:"#0d9488", artist:"#a855f7", partido:"#f59e0b", lider:"#ef4444", sindicato:"#b45309" };
 const LOGOS = {
+  "Jet": "img/jet.svg",
+  "Noel": "img/noel.svg",
+  "Crem Helado": "img/crem-helado.svg",
+  "Sello Rojo": "img/sello-rojo.svg",
+  "Servibanca": "img/servibanca.svg",
+  "El Heraldo": "img/el-heraldo.svg",
   "Bancolombia": "img/bancolombia.png",
   "BBVA": "img/bbva.svg",
   "Banco de Bogotá": "img/banco-de-bogota.png",
@@ -389,7 +396,7 @@ const FOTOS = {
   "Jhonny Romero": "img/fotos/jhonny-romero.png"
 };
 function initials(name){ const s = String(name).replace(/\([^)]*\)/g,"").replace(/[@#][\w.]+/g,"").trim(); const parts = s.split(/\s+/).filter(Boolean); return (parts.length>=2 ? parts[0][0]+parts[1][0] : s.slice(0,2)).toUpperCase(); }
-const FILL_LOGOS = new Set(["Banco de Bogotá","Americana de Colchones"]);
+const FILL_LOGOS = new Set(["Banco de Bogotá","Americana de Colchones","Sello Rojo"]);
 function avatarHTML(e){ if (LOGOS[e.name]) return `<div class="avatar avatar-logo${FILL_LOGOS.has(e.name) ? " avatar-fill" : ""}"><img src="${LOGOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; if (FOTOS[e.name]) return `<div class="avatar avatar-foto"><img src="${FOTOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; return `<div class="avatar" style="--c:${CAT_COLOR[e.category]||"#64748b"}">${esc(initials(e.name))}</div>`; }
 const strip = h => String(h).replace(/^@/, "").trim();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -410,6 +417,10 @@ const ytProfileUrl = h => {
 };
 
 let activeCat = "all", activeSub = "all", query = "";
+const GROUP_NOTES = {
+  "grupo gilinski": "Vínculo indirecto: estas empresas no han hecho una acción propia a favor de Abelardo de la Espriella. Se incluyen porque pertenecen al Grupo Gilinski, cuyo banco GNB Sudameris otorgó un crédito a su campaña y cuya revista Semana tuvo una línea editorial favorable.",
+  "marcas de nutresa": "Vínculo indirecto: marcas de Grupo Nutresa (del Grupo Gilinski). No han hecho una acción propia a favor del candidato; se incluyen por la propiedad del grupo, vinculado a la campaña a través del crédito de GNB Sudameris y la línea editorial de Semana."
+};
 const grid = document.getElementById("grid");
 
 /* ---------- Mi lista: guardar perfiles (localStorage, sin cuenta) ---------- */
@@ -460,6 +471,7 @@ function render(){
   }
   grid.innerHTML = (activeCat === "saved" ? SAVED_HINT : "") + order.map(k =>
     `<section class="group"><h2 class="group-title">${esc(k)} <span class="group-count">${groups[k].length}</span></h2>`
+    + (GROUP_NOTES[k.toLowerCase()] ? `<p class="group-note">${GROUP_NOTES[k.toLowerCase()]}</p>` : "")
     + `<div class="grid-inner">${groups[k].map(e => card(e, ENTRIES.indexOf(e))).join("")}</div></section>`
   ).join("");
 }
