@@ -1,0 +1,85 @@
+# Espejo IPFS — copia descentralizada y resistente a censura del sitio.
+# En cada push sube el sitio a IPFS (vía Pinata) y actualiza solo el enlace
+# "Espejo IPFS" del pie de página.
+#
+# REQUISITO (una sola vez): un secreto del repo llamado PINATA_JWT
+#   1) Crea cuenta en https://pinata.cloud  (correo neutral, vía VPN).
+#   2) Pinata -> API Keys -> New Key -> marca "pinFileToIPFS" (o Admin) -> copia el JWT.
+#   3) GitHub repo -> Settings -> Secrets and variables -> Actions -> New repository secret
+#        Name:  PINATA_JWT      Value: (el JWT que copiaste)
+#   4) Pestaña Actions -> "Espejo IPFS" -> Run workflow  (o haz cualquier push).
+# Sin el secreto, este workflow se salta solo (no falla).
+
+name: Espejo IPFS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ipfs-mirror
+
+jobs:
+  pin:
+    if: ${{ !contains(github.event.head_commit.message, '[ipfs]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Subir y fijar el sitio en IPFS (Pinata)
+        id: pin
+        env:
+          PINATA_JWT: ${{ secrets.PINATA_JWT }}
+        run: |
+          if [ -z "$PINATA_JWT" ]; then
+            echo "::notice::PINATA_JWT no configurado todavia. Espejo IPFS omitido (no es un error)."
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Construye la subida multipart con TODOS los archivos del sitio (rutas relativas).
+          args=()
+          while IFS= read -r -d '' f; do
+            args+=(-F "file=@${f};filename=${f#./}")
+          done < <(find . -type f \
+            -not -path './.git/*' \
+            -not -path './.github/*' \
+            -not -path './metrics-worker/*' -print0)
+          resp=$(curl -sS --max-time 180 -X POST "https://api.pinata.cloud/pinning/pinFileToIPFS" \
+            -H "Authorization: Bearer ${PINATA_JWT}" \
+            "${args[@]}" \
+            -F 'pinataOptions={"cidVersion":1}' \
+            -F 'pinataMetadata={"name":"apoyaronaabelardo.org"}')
+          echo "Respuesta Pinata: ${resp:0:300}"
+          cid=$(printf '%s' "$resp" | jq -r '.IpfsHash // empty')
+          if [ -z "$cid" ]; then
+            echo "::error::No se obtuvo CID. Revisa el PINATA_JWT y la respuesta de arriba."
+            exit 1
+          fi
+          echo "cid=$cid" >> "$GITHUB_OUTPUT"
+          echo "::notice::Sitio fijado en IPFS. CID: $cid"
+
+      - name: Actualizar el enlace del espejo en el pie
+        if: ${{ steps.pin.outputs.skip != '1' && steps.pin.outputs.cid != '' }}
+        run: |
+          CID="${{ steps.pin.outputs.cid }}"
+          URL="https://${CID}.ipfs.dweb.link"
+          node -e '
+            const fs = require("fs");
+            const url = process.argv[1];
+            let h = fs.readFileSync("index.html", "utf8");
+            const out = h.replace(/ipfs:\s*"[^"]*"/, `ipfs: "${url}"`);
+            if (out !== h) { fs.writeFileSync("index.html", out); console.log("MIRRORS.ipfs -> " + url); }
+            else { console.log("sin cambios en MIRRORS.ipfs"); }
+          ' "$URL"
+          if git diff --quiet -- index.html; then
+            echo "Nada que actualizar."
+            exit 0
+          fi
+          git config user.name "anonymous"
+          git config user.email "anonymous@example.com"
+          git commit -am "espejo IPFS: actualizar CID a ${CID} [ipfs]"
+          git push
