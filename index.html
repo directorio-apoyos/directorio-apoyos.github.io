@@ -153,6 +153,7 @@
   .ev-list a{color:var(--accent)}
   .ev-images{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin:6px 0}
   .ev-images img{width:100%; height:120px; object-fit:cover; border-radius:8px; border:1px solid var(--line); display:block}
+  .ev-images video{grid-column:1 / -1; width:100%; max-width:400px; height:auto; border-radius:8px; border:1px solid var(--line); display:block; background:#000; margin:2px 0}
   .empty{color:var(--muted); text-align:center; padding:40px}
   footer{max-width:1000px; margin:0 auto; padding:0 20px 40px; color:var(--muted); font-size:.8rem}
   .mirrors{margin-top:8px}
@@ -692,7 +693,7 @@ function openModal(e){
   const evList = ev.length ? `<h4>Pruebas y fuentes</h4><ul class="ev-list">`
     + ev.map(x => `<li><a href="${esc(x.u)}" target="_blank" rel="noopener noreferrer">${esc(x.t || x.u)} ↗</a></li>`).join("") + `</ul>` : "";
   const imgs = (e.images && e.images.length) ? `<div class="ev-images">`
-    + e.images.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="" loading="lazy"></a>`).join("") + `</div>` : "";
+    + e.images.map(u => /\.(mp4|webm|mov|ogg)$/i.test(u) ? `<video controls preload="metadata" playsinline src="${esc(u)}"></video>` : `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="" loading="lazy"></a>`).join("") + `</div>` : "";
   modalContent.innerHTML = `
     <div class="modal-head">${avatarHTML(e)}<div><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}<h2 class="modal-title">${esc(e.name)}</h2></div></div>
     <p class="modal-desc">${esc(e.description || "")}</p>
