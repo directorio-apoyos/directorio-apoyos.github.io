@@ -43,7 +43,7 @@ jobs:
           # Construye la subida multipart con TODOS los archivos del sitio (rutas relativas).
           args=()
           while IFS= read -r -d '' f; do
-            args+=(-F "file=@${f};filename=${f#./}")
+            args+=(-F "file=@${f};filename=site/${f#./}")
           done < <(find . -type f \
             -not -path './.git/*' \
             -not -path './.github/*' \
