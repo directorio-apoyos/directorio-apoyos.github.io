@@ -850,8 +850,9 @@ grid.addEventListener("click", ev => {
 (function buildFacesBand(){
   const band = document.getElementById("faces-band");
   if (!band) return;
-  const faces = Object.entries(FOTOS).map(([n,p]) => [n,p,false]);
-  const logos = (typeof LOGOS !== "undefined" ? Object.entries(LOGOS) : []).map(([n,p]) => [n,p,true]);
+  const faces = Object.entries(FOTOS).map(([n,p]) => [n,p,false]).slice(0, 20);
+  // Banda decorativa (arriba del fold): muestra una muestra, no todo, para no cargar +90 imágenes en móvil.
+  const logos = (typeof LOGOS !== "undefined" ? Object.entries(LOGOS) : []).map(([n,p]) => [n,p,true]).filter((_, i) => i % 2 === 0);
   if (faces.length + logos.length < 6) { band.remove(); return; }
   // intercalar los logos repartidos entre las caras
   const all = []; let li = 0;
@@ -864,7 +865,7 @@ grid.addEventListener("click", ev => {
     list.concat(list).forEach(([name, p, isLogo]) => {
       const img = document.createElement("img");
       img.className = "face-tile" + (isLogo && !FILL_LOGOS.has(name) ? " is-logo" : "");
-      img.src = p; img.alt = ""; img.loading = "lazy";
+      img.src = p; img.alt = ""; img.loading = "eager"; img.decoding = "async";
       img.title = name; img.dataset.name = name;
       row.appendChild(img);
     });
