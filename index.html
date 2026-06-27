@@ -102,9 +102,12 @@
     background-image:linear-gradient(135deg, rgba(255,255,255,.24), rgba(0,0,0,.2)); box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
   .avatar-logo{background:#fff; background-image:none; padding:5px; border-radius:13px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
   .avatar-logo img{width:100%; height:100%; object-fit:contain; display:block}
+  .avatar-logo.avatar-fill{background:none; padding:0; overflow:hidden}
+  .avatar-logo.avatar-fill img{object-fit:cover}
   .avatar-foto{padding:0; background:none; background-image:none; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
   .avatar-foto img{width:100%; height:100%; object-fit:cover; display:block}
   .modal-head .avatar-logo{border-radius:15px; padding:7px}
+  .modal-head .avatar-logo.avatar-fill{padding:0}
   .card-head{display:flex; gap:13px; align-items:center}
   .card-head-text{display:flex; flex-direction:column; gap:6px; min-width:0; align-items:flex-start}
   .card-head-text h3{margin:0}
@@ -352,7 +355,8 @@ const FOTOS = {
   "Jhonny Romero": "img/fotos/jhonny-romero.png"
 };
 function initials(name){ const s = String(name).replace(/\([^)]*\)/g,"").replace(/[@#][\w.]+/g,"").trim(); const parts = s.split(/\s+/).filter(Boolean); return (parts.length>=2 ? parts[0][0]+parts[1][0] : s.slice(0,2)).toUpperCase(); }
-function avatarHTML(e){ if (LOGOS[e.name]) return `<div class="avatar avatar-logo"><img src="${LOGOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; if (FOTOS[e.name]) return `<div class="avatar avatar-foto"><img src="${FOTOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; return `<div class="avatar" style="--c:${CAT_COLOR[e.category]||"#64748b"}">${esc(initials(e.name))}</div>`; }
+const FILL_LOGOS = new Set(["Banco de Bogotá","Americana de Colchones"]);
+function avatarHTML(e){ if (LOGOS[e.name]) return `<div class="avatar avatar-logo${FILL_LOGOS.has(e.name) ? " avatar-fill" : ""}"><img src="${LOGOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; if (FOTOS[e.name]) return `<div class="avatar avatar-foto"><img src="${FOTOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; return `<div class="avatar" style="--c:${CAT_COLOR[e.category]||"#64748b"}">${esc(initials(e.name))}</div>`; }
 const strip = h => String(h).replace(/^@/, "").trim();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const isPend = e => /confirmar|se[ñn]alad/i.test((e && e.estado) || "");
