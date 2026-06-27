@@ -281,6 +281,7 @@ const LOGOS = {
   "Fenalco": "img/fenalco.png"
 };
 const FOTOS = {
+  "Carlos Lehder": "img/fotos/carlos-lehder.jpg",
   "Marbelle": "img/fotos/marbelle.jpg",
   "Silvestre Dangond": "img/fotos/silvestre-dangond.jpg",
   "Miguel Morales": "img/fotos/miguel-morales.webp",
@@ -698,8 +699,7 @@ function openModal(e){
     <div class="modal-head">${avatarHTML(e)}<div><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}<h2 class="modal-title">${esc(e.name)}</h2></div></div>
     <p class="modal-desc">${esc(e.description || "")}</p>
     ${imgs}${evList}
-    <h4>Dejar de seguir / no consumir</h4>
-    <div class="platforms">${platformsHTML(e)}</div>`;
+    ${platformsHTML(e) ? `<h4>Dejar de seguir / no consumir</h4><div class="platforms">${platformsHTML(e)}</div>` : ""}`;
   modal.hidden = false;
   // Apertura de ficha: reutilizamos el evento "unsub" (ya sin uso, sin API de YouTube) como contador, para no redesplegar el Worker.
   metricHit("unsub");
