@@ -147,6 +147,9 @@
   .modal-head .modal-title{margin:6px 0 0}
   @media (max-width:560px){ .avatar{width:80px; height:80px; font-size:1.7rem} .card-head{gap:14px} .modal-head .avatar{width:92px; height:92px} }
   .desc{font-size:.9rem; margin:0}
+  .desc.clamp{display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden}
+  .ver-mas{align-self:flex-start; background:none; border:none; color:var(--accent); font-size:.82rem; font-weight:600; cursor:pointer; padding:0; margin:-3px 0 0}
+  .ver-mas:hover{text-decoration:underline}
   .source{font-size:.8rem}
   .source a{color:var(--accent)}
   .platforms{display:flex; flex-wrap:wrap; gap:7px; align-items:center; margin-top:auto; padding-top:6px}
@@ -534,7 +537,8 @@ function card(e, i){
     <article id="${slugify(e.name)}" class="card${isPend(e) ? " pendiente" : ""}" data-id="${i}">
       ${saveBtn(e.name)}
       <div class="card-head">${avatarHTML(e)}<div class="card-head-text"><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>${isPend(e) ? `<span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}${isIndirect(e) ? `<span class="badge badge-indirecto">Vínculo indirecto</span>` : ""}<h3>${esc(e.name)}</h3></div></div>
-      <p class="desc">${esc(e.description || "")}</p>
+      <p class="desc${(e.description || "").length > 170 ? " clamp" : ""}">${esc(e.description || "")}</p>
+      ${(e.description || "").length > 170 ? `<button class="ver-mas" type="button">ver más</button>` : ""}
       ${n ? `<p class="card-more">Ver pruebas (${n}) →</p>` : ""}
       <div class="platforms">${platformsHTML(e)}</div>
     </article>`;
@@ -834,6 +838,15 @@ grid.addEventListener("click", ev => {
   if (!c) return;
   const e = ENTRIES[Number(c.dataset.id)];
   if (e) openModal(e);
+});
+// "ver más" / "ver menos": expandir/contraer descripciones largas en la tarjeta
+grid.addEventListener("click", ev => {
+  const b = ev.target.closest(".ver-mas");
+  if (!b) return;
+  ev.stopPropagation();
+  const d = b.parentElement.querySelector(".desc");
+  if (!d) return;
+  b.textContent = d.classList.toggle("clamp") ? "ver más" : "ver menos";
 });
 
 /* ---------- enlaces a espejos en el pie (si están configurados) ---------- */
