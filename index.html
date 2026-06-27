@@ -126,6 +126,7 @@
   .card.pendiente{border-color:#e3c98a}
   :root[data-theme="dark"] .badge-pendiente{color:#ffce4d; border-color:#7a5c00; background:rgba(122,92,0,.2)}
   :root[data-theme="dark"] .card.pendiente{border-color:#7a5c00}
+  .badge-indirecto{color:var(--accent); border-color:var(--accent); background:rgba(91,141,239,.12); text-transform:none}
   .avatar{width:70px; height:70px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
     font-weight:700; font-size:1.5rem; color:#fff; letter-spacing:.01em; background:var(--c,#64748b);
     background-image:linear-gradient(135deg, rgba(255,255,255,.24), rgba(0,0,0,.2)); box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
@@ -394,6 +395,7 @@ const strip = h => String(h).replace(/^@/, "").trim();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const isPend = e => /confirmar|se[ñn]alad/i.test((e && e.estado) || "");
 const slugify = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/\([^)]*\)/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+const isIndirect = e => /indirect/i.test((e && e.estado) || "");
 
 const PLATFORMS = [
   { key:"instagram", label:"Instagram", color:"#E1306C", url:h=>h.startsWith("http")?h:`https://www.instagram.com/${strip(h)}/` },
@@ -501,7 +503,7 @@ function card(e, i){
   return `
     <article id="${slugify(e.name)}" class="card${isPend(e) ? " pendiente" : ""}" data-id="${i}">
       ${saveBtn(e.name)}
-      <div class="card-head">${avatarHTML(e)}<div class="card-head-text"><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>${isPend(e) ? `<span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}<h3>${esc(e.name)}</h3></div></div>
+      <div class="card-head">${avatarHTML(e)}<div class="card-head-text"><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${e.subcategory ? " · " + esc(e.subcategory) : ""}</span>${isPend(e) ? `<span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}${isIndirect(e) ? `<span class="badge badge-indirecto">Vínculo indirecto</span>` : ""}<h3>${esc(e.name)}</h3></div></div>
       <p class="desc">${esc(e.description || "")}</p>
       ${n ? `<p class="card-more">Ver pruebas (${n}) →</p>` : ""}
       <div class="platforms">${platformsHTML(e)}</div>
@@ -783,7 +785,7 @@ function openModal(e){
   const imgs = (e.images && e.images.length) ? `<div class="ev-images">`
     + e.images.map(u => /\.(mp4|webm|mov|ogg)$/i.test(u) ? `<video controls preload="metadata" playsinline src="${esc(u)}"></video>` : `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="" loading="lazy"></a>`).join("") + `</div>` : "";
   modalContent.innerHTML = `
-    <div class="modal-head">${avatarHTML(e)}<div><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}<h2 class="modal-title">${esc(e.name)}</h2></div></div>
+    <div class="modal-head">${avatarHTML(e)}<div><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}${isIndirect(e) ? ` <span class="badge badge-indirecto">Vínculo indirecto</span>` : ""}<h2 class="modal-title">${esc(e.name)}</h2></div></div>
     <p class="modal-desc">${esc(e.description || "")}</p>
     ${imgs}${evList}
     ${platformsHTML(e) ? `<h4>Dejar de seguir / no consumir</h4><div class="platforms">${platformsHTML(e)}</div>` : ""}`;
