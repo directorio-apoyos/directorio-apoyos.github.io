@@ -1,0 +1,12 @@
+name = "registro-metricas-do"
+main = "src/worker.js"
+compatibility_date = "2026-06-01"
+
+# Durable Object con almacenamiento SQLite (elegible en plan gratuito).
+[[durable_objects.bindings]]
+name = "COUNTER"
+class_name = "Counter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Counter"]
