@@ -59,6 +59,7 @@
   .face-tile:hover{transform:scale(1.1); filter:brightness(1.12); position:relative; z-index:2;
     box-shadow:0 4px 14px rgba(0,0,0,.45)}
   .face-tile.is-logo{object-fit:contain; background:#fff; padding:8px}
+  .face-tile:not(.is-logo){object-position:center 20%}
   @keyframes facesMarquee{from{transform:translateX(0)} to{transform:translateX(-50%)}}
   @media (max-width:560px){ .face-tile{width:66px; height:66px; border-radius:13px} .faces-band{gap:6px} }
   @media (prefers-reduced-motion:reduce){ .faces-row{animation:none} .faces-band{overflow-x:auto} }
