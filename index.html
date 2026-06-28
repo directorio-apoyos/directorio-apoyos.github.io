@@ -900,15 +900,11 @@ grid.addEventListener("click", ev => {
 (function buildFacesBand(){
   const band = document.getElementById("faces-band");
   if (!band) return;
+  // Banda decorativa (arriba del fold): una muestra, no todo, para no cargar +90 imágenes en móvil.
+  // Línea 1 = solo logos/marcas/bancos; línea 2 = solo fotos de personas/artistas.
   const faces = Object.entries(FOTOS).map(([n,p]) => [n,p,false]).slice(0, 20);
-  // Banda decorativa (arriba del fold): muestra una muestra, no todo, para no cargar +90 imágenes en móvil.
-  const logos = (typeof LOGOS !== "undefined" ? Object.entries(LOGOS) : []).map(([n,p]) => [n,p,true]).filter((_, i) => i % 2 === 0);
+  const logos = (typeof LOGOS !== "undefined" ? Object.entries(LOGOS) : []).map(([n,p]) => [n,p,true]).slice(0, 20);
   if (faces.length + logos.length < 6) { band.remove(); return; }
-  // intercalar los logos repartidos entre las caras
-  const all = []; let li = 0;
-  const gap = Math.max(1, Math.floor(faces.length / (logos.length || 1)));
-  faces.forEach((f, i) => { all.push(f); if (li < logos.length && (i + 1) % gap === 0) all.push(logos[li++]); });
-  while (li < logos.length) all.push(logos[li++]);
   const makeRow = (cls, list) => {
     const row = document.createElement("div");
     row.className = "faces-row " + cls;
@@ -921,9 +917,8 @@ grid.addEventListener("click", ev => {
     });
     return row;
   };
-  const mid = Math.ceil(all.length / 2);
-  band.appendChild(makeRow("r1", all.slice(0, mid)));
-  band.appendChild(makeRow("r2", all.slice(mid).concat(all.slice(0, 3))));
+  band.appendChild(makeRow("r1", logos));
+  band.appendChild(makeRow("r2", faces));
   band.addEventListener("click", ev => {
     const t = ev.target.closest(".face-tile");
     if (!t) return;
