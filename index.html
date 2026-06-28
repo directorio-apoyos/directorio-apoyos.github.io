@@ -450,10 +450,10 @@ let activeCat = "all", activeSub = "all", query = "";
 const GROUP_NOTES = {
   "grupo gilinski": "Vínculo indirecto: estas empresas no han hecho una acción propia a favor de Abelardo de la Espriella. Se incluyen porque pertenecen al Grupo Gilinski, cuyo banco GNB Sudameris otorgó un crédito a su campaña y cuya revista Semana tuvo una línea editorial favorable.",
   "marcas de nutresa": "Vínculo indirecto: marcas de Grupo Nutresa (del Grupo Gilinski). No han hecho una acción propia a favor del candidato; se incluyen por la propiedad del grupo, vinculado a la campaña a través del crédito de GNB Sudameris y la línea editorial de Semana.",
-  "organización ardila lülle": "Vínculo indirecto: se incluyen por el patrón político de su propietario, no por una acción propia del medio o la empresa a favor del candidato. La Organización Ardila Lülle ha financiado de forma sistemática a partidos de derecha y centro-derecha: en 2022 aportó más de $17.000 millones a 13 colectividades (Liberal y de la U como principales; luego Conservador y Centro Democrático), sin un solo aporte al Pacto Histórico de Gustavo Petro. Ese mismo año, el informe final de la Misión de Observación Electoral de la Unión Europea señaló en RCN, La FM y El Tiempo una 'tendencia de cubrimiento sesgado desfavorable al Pacto Histórico'.",
+  "organización ardila lülle": "Estas marcas y medios pertenecen a la Organización Ardila Lülle (familia Ardila). Aparecen aquí por su dueño, no por una acción de cada marca: el mismo grupo es propietario de los canales RCN y La FM —que la Misión de Observación Electoral de la Unión Europea señaló en 2022 por una cobertura sesgada en contra de la izquierda— y en ese año financió más de $17.000 millones a partidos de derecha, nunca a la izquierda.",
   "grupo santo domingo (valorem)": "Grupo de la familia Santo Domingo (Valorem), dueño de Caracol Televisión, Blu Radio y El Espectador. Un estudio académico (UPB) concluyó que en 2018 los noticieros de Caracol favorecieron a candidatos de derecha sobre la izquierda.",
   "grupo sarmiento angulo (grupo aval)": "Vínculo indirecto: empresas del Grupo Aval, de Luis Carlos Sarmiento Angulo (también dueño del diario El Tiempo). Su Banco de Bogotá otorgó un crédito de $15.000 millones a la campaña de De la Espriella en primera vuelta. Se incluyen por la propiedad del grupo, no por una acción propia de cada empresa.",
-  "marcas de postobón": "Vínculo indirecto: marcas propias de Postobón (Organización Ardila Lülle). Se incluyen por la propiedad del grupo, no por una acción propia de la marca. No se incluyen marcas que Postobón solo embotella o distribuye, como Pepsi o 7Up, que son de PepsiCo."
+  "marcas de postobón": "Marcas propias de Postobón, empresa de la Organización Ardila Lülle (familia Ardila). Aparecen por ese dueño —el grupo es propietario de los canales RCN y La FM (señalados por sesgo contra la izquierda) y financiador de partidos de derecha—, no por una acción de la marca. No incluye marcas que Postobón solo embotella o distribuye, como Pepsi o 7Up, que son de PepsiCo."
 };
 const grid = document.getElementById("grid");
 
@@ -834,6 +834,7 @@ function openModal(e){
   modalContent.innerHTML = `
     <div class="modal-head">${avatarHTML(e)}<div><span class="badge">${CAT_LABEL[e.category] || esc(e.category)}${sub}</span>${isPend(e) ? ` <span class="badge badge-pendiente">⚠️ Por confirmar</span>` : ""}${isIndirect(e) ? ` <span class="badge badge-indirecto">Vínculo indirecto</span>` : ""}<h2 class="modal-title">${esc(e.name)}</h2></div></div>
     <p class="modal-desc">${esc(e.description || "")}</p>
+    ${GROUP_NOTES[(e.subcategory || "").toLowerCase()] ? `<p class="group-note">${GROUP_NOTES[(e.subcategory || "").toLowerCase()]}</p>` : ""}
     ${imgs}${evList}
     ${platformsHTML(e) ? `<h4>Dejar de seguir / no consumir</h4><div class="platforms">${platformsHTML(e)}</div>` : ""}`;
   modal.hidden = false;
