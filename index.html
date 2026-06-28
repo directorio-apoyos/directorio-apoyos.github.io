@@ -216,9 +216,7 @@
     <button data-cat="artist">Artistas</button>
     <button data-cat="company">Empresas</button>
     <button data-cat="media">Medios</button>
-    <button data-cat="partido">Partidos</button>
-    <button data-cat="lider">Líderes</button>
-    <button data-cat="sindicato">Sindicatos</button>
+    <button data-cat="politica">Política</button>
     <button data-cat="saved" id="filter-saved" class="filter-saved" title="Los perfiles que guardaste"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg> Mi lista <span class="saved-count" id="saved-count">0</span></button>
   </div>
 </div>
@@ -308,8 +306,8 @@ let ENTRIES = SAMPLE;  // ← se reemplaza por datos.csv si está disponible
 /* ============================================================
    3) LÓGICA — normalmente no necesitas tocar de aquí en adelante.
    ============================================================ */
-const CAT_LABEL = { media:"Medios", company:"Empresas", artist:"Artistas", sindicato:"Sindicatos", partido:"Partidos", lider:"Líderes" };
-const CAT_COLOR = { media:"#3b82f6", company:"#0d9488", artist:"#a855f7", partido:"#f59e0b", lider:"#ef4444", sindicato:"#b45309" };
+const CAT_LABEL = { media:"Medios", company:"Empresas", artist:"Artistas", politica:"Política" };
+const CAT_COLOR = { media:"#3b82f6", company:"#0d9488", artist:"#a855f7", politica:"#f59e0b" };
 const LOGOS = {
   "Jet": "img/jet.png",
   "Noel": "img/noel.svg",
@@ -523,7 +521,7 @@ function render(){
   const groups = {}, order = [];
   for (const e of items){ const k = groupOf(e); if (!groups[k]){ groups[k] = []; order.push(k); } groups[k].push(e); }
   if (byCat){
-    const LABEL_ORDER = ["artist","company","media","partido","lider","sindicato"].map(c => CAT_LABEL[c]);
+    const LABEL_ORDER = ["artist","company","media","politica"].map(c => CAT_LABEL[c]);
     order.sort((a,b) => (LABEL_ORDER.indexOf(a)<0?99:LABEL_ORDER.indexOf(a)) - (LABEL_ORDER.indexOf(b)<0?99:LABEL_ORDER.indexOf(b)));
   }
   grid.innerHTML = (activeCat === "saved" ? SAVED_HINT : "") + order.map(k =>
@@ -696,7 +694,7 @@ document.getElementById("subfilters").addEventListener("click", ev => {
 document.getElementById("search").addEventListener("input", ev => { query = ev.target.value; render(); });
 
 /* ---------- Datos desde datos.csv (se edita como hoja de cálculo) ---------- */
-const CAT_MAP = { medios:"media", media:"media", empresas:"company", empresa:"company", company:"company", artistas:"artist", artista:"artist", artist:"artist", sindicatos:"sindicato", sindicato:"sindicato", partidos:"partido", partido:"partido", lideres:"lider", lider:"lider" };
+const CAT_MAP = { medios:"media", media:"media", empresas:"company", empresa:"company", company:"company", artistas:"artist", artista:"artist", artist:"artist", sindicatos:"politica", sindicato:"politica", partidos:"politica", partido:"politica", lideres:"politica", lider:"politica", politica:"politica" };
 const deaccent = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
 function parseCSV(text){
   text = text.replace(/^﻿/, "");
