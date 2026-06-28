@@ -234,7 +234,7 @@
   <div style="max-width:1000px;margin:14px auto;padding:0 20px;color:var(--muted)">
   <p>Activa JavaScript para ver el registro completo —con fuentes— de quienes respaldaron a Abelardo de la Espriella, y de la financiación de su campaña (Cuentas Claras – CNE).</p>
   <h2>Marcas, empresas, medios y personas vinculadas a Abelardo de la Espriella</h2>
-  <h3>Medios (9)</h3>
+  <h3>Medios (10)</h3>
   <ul>
     <li>Semana — Revista del Grupo Gilinski (Gabriel Gilinski).</li>
     <li>El Tiempo — Diario controlado al 100% por Luis Carlos Sarmiento Angulo (Grupo Aval) desde 2012.</li>
@@ -245,6 +245,7 @@
     <li>NTN24 — Canal de noticias internacional de la Organización Ardila Lülle (familia Ardila), el mismo grupo dueño de RCN y La FM —señalados por su cobertura s…</li>
     <li>Win Sports — Canal de televisión deportiva (fútbol colombiano) de la Organización Ardila Lülle (familia Ardila), el mismo grupo dueño de RCN y La FM, señalados…</li>
     <li>La República — Diario económico de la Organización Ardila Lülle (familia Ardila), el mismo grupo dueño de RCN y La FM, señalados por su cobertura sesgada contra l…</li>
+    <li>El Colombiano — Diario de Medellín, el más leído de Antioquia, de línea editorial históricamente conservadora (fundado en 1912 para defender los &#x27;principios conser…</li>
   </ul>
   <h3>Empresas (55)</h3>
   <ul>
@@ -471,6 +472,7 @@ let ENTRIES = SAMPLE;  // ← se reemplaza por datos.csv si está disponible
 const CAT_LABEL = { media:"Medios", company:"Empresas", artist:"Artistas", politica:"Política" };
 const CAT_COLOR = { media:"#3b82f6", company:"#0d9488", artist:"#a855f7", politica:"#f59e0b" };
 const LOGOS = {
+  "El Colombiano": "img/el-colombiano.jpg",
   "Jet": "img/jet.png",
   "Noel": "img/noel.svg",
   "Crem Helado": "img/crem-helado.svg",
@@ -615,7 +617,7 @@ const FOTOS = {
   "Jhonny Romero": "img/fotos/jhonny-romero.png"
 };
 function initials(name){ const s = String(name).replace(/\([^)]*\)/g,"").replace(/[@#][\w.]+/g,"").trim(); const parts = s.split(/\s+/).filter(Boolean); return (parts.length>=2 ? parts[0][0]+parts[1][0] : s.slice(0,2)).toUpperCase(); }
-const FILL_LOGOS = new Set(["Banco de Bogotá","Americana de Colchones","Sello Rojo","Jet","Bon Bril","Agua Cristal","Los Coches"]);
+const FILL_LOGOS = new Set(["Banco de Bogotá","Americana de Colchones","Sello Rojo","Jet","Bon Bril","Agua Cristal","Los Coches","El Colombiano"]);
 function avatarHTML(e){ if (LOGOS[e.name]) return `<div class="avatar avatar-logo${FILL_LOGOS.has(e.name) ? " avatar-fill" : ""}"><img src="${LOGOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; if (FOTOS[e.name]) return `<div class="avatar avatar-foto"><img src="${FOTOS[e.name]}" alt="${esc(e.name)}" loading="lazy"></div>`; return `<div class="avatar" style="--c:${CAT_COLOR[e.category]||"#64748b"}">${esc(initials(e.name))}</div>`; }
 const strip = h => String(h).replace(/^@/, "").trim();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
