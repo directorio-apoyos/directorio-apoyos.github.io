@@ -436,7 +436,7 @@ const METRICS_URL = "https://registro-metricas.ursul-be.workers.dev";
    STATS_BASE = valor REAL (1:1) que ya tenía KV al activar el muestreo (2026-06-28),
    para no inflar ese histórico al multiplicar. Mostrado = base + (raw - base) * SAMPLE_N.
    Si vuelve a congelarse, subir SAMPLE_N (y dejar STATS_BASE en el raw de ese momento). */
-const SAMPLE_N = 5;
+const SAMPLE_N = 10;
 const STATS_BASE = { visitas: 964, enlaces: 329, cancelaciones: 390 };
 
 /* ============================================================
